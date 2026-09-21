@@ -35,7 +35,8 @@ async function renderLoanDetail(loanId) {
   document.getElementById("sum-emi").textContent = money(loan.emiAmount);
   document.getElementById("sum-interest").textContent = money(loan.totalInterest);
   document.getElementById("sum-outstanding").textContent = money(loan.outstandingBalance);
-  document.getElementById("sum-repaid").textContent = loan.percentRepaid.toFixed(1) + "%";
+  document.getElementById("sum-repaid").textContent =
+    loan.percentRepaid.toFixed(1) + "%  (" + loan.paidCount + " of " + loan.tenureMonths + " paid)";
   document.getElementById("sum-status").innerHTML = statusPill(loan.status);
 
   var repaid = Math.max(0, Math.min(100, loan.percentRepaid));
@@ -43,7 +44,7 @@ async function renderLoanDetail(loanId) {
   document.getElementById("repaid-meter").title = repaid.toFixed(1) + "% repaid";
 
   showForeclosureState(loan);
-  renderSchedule(loan.schedule);
+  renderSchedule(loan);
 }
 
 function showForeclosureState(loan) {
@@ -66,11 +67,16 @@ function showForeclosureState(loan) {
   };
 }
 
-function renderSchedule(schedule) {
-  document.getElementById("schedule-rows").innerHTML = schedule
+function renderSchedule(loan) {
+  document.getElementById("schedule-rows").innerHTML = loan.schedule
     .map(function (row) {
       return (
-        '<tr><td class="num">' + row.emiNumber +
+        '<tr class="' + (row.paid ? "paid" : "") + '">' +
+        '<td class="tick"><input type="checkbox" class="emi-tick" data-emi="' + row.emiNumber + '"' +
+        (row.paid ? " checked" : "") +
+        (loan.foreclosed ? " disabled" : "") +
+        "></td>" +
+        '<td class="num">' + row.emiNumber +
         "</td><td>" + prettyDate(row.dueDate) +
         '</td><td class="num">' + money(row.emiAmount) +
         '</td><td class="num">' + money(row.principal) +
@@ -81,6 +87,24 @@ function renderSchedule(schedule) {
       );
     })
     .join("");
+
+  var ticks = document.querySelectorAll(".emi-tick");
+  for (var i = 0; i < ticks.length; i++) {
+    ticks[i].addEventListener("change", function (event) {
+      markEmi(loan.id, event.currentTarget.getAttribute("data-emi"), event.currentTarget.checked);
+    });
+  }
+}
+
+async function markEmi(loanId, emiNumber, paid) {
+  setError("foreclose-error", "");
+  try {
+    await api.markEmiPaid(loanId, emiNumber, paid);
+    await renderLoanDetail(loanId);
+  } catch (err) {
+    setError("foreclose-error", err.message);
+    await renderLoanDetail(loanId);
+  }
 }
 
 async function foreclose(loan) {

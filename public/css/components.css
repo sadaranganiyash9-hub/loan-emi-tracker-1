@@ -121,3 +121,8 @@
 }
 .swatch.principal { background: var(--series-principal); }
 .swatch.interest { background: var(--series-interest); }
+
+.grid th.tick, .grid td.tick { width: 3rem; text-align: center; }
+.grid td.tick input { width: 15px; height: 15px; min-width: 0; accent-color: var(--series-principal); cursor: pointer; }
+.grid tr.paid td { color: var(--ink-muted); }
+.grid tr.paid td.name, .grid tr.paid td.num { color: var(--ink-muted); }

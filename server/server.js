@@ -154,6 +154,25 @@ app.post("/api/loans", requireLogin, (req, res) => {
   res.status(201).json(buildLoanView(loan));
 });
 
+app.post("/api/loans/:id/emis/:number", requireLogin, (req, res) => {
+  const loan = db.findLoanById(req.params.id);
+  if (!loan) {
+    return res.status(404).json({ error: "Loan not found" });
+  }
+  if (loan.foreclosedAt) {
+    return res.status(409).json({ error: "This loan has been foreclosed" });
+  }
+
+  const emiNumber = Number(req.params.number);
+  if (!Number.isInteger(emiNumber) || emiNumber < 1 || emiNumber > loan.tenureMonths) {
+    return res.status(400).json({ error: "No such EMI on this loan" });
+  }
+
+  const paid = Boolean(req.body && req.body.paid);
+  const updated = db.setEmiPaid(loan.id, emiNumber, paid);
+  res.json(buildLoanView(updated));
+});
+
 app.post("/api/loans/:id/foreclose", requireLogin, (req, res) => {
   const loan = db.findLoanById(req.params.id);
   if (!loan) {

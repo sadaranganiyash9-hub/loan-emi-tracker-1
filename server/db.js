@@ -77,10 +77,27 @@ function addLoan(memberId, principal, annualRatePercent, tenureMonths, startDate
     tenureMonths: tenureMonths,
     startDate: startDate,
     createdAt: new Date().toISOString(),
+    paidEmis: [],
     foreclosedAt: null,
     foreclosureAmount: null,
   };
   data.loans.push(loan);
+  saveToDisk();
+  return loan;
+}
+
+function setEmiPaid(loanId, emiNumber, paid) {
+  const loan = findLoanById(loanId);
+  if (!loan) throw new Error("Loan not found");
+  if (!loan.paidEmis) loan.paidEmis = [];
+
+  const at = loan.paidEmis.indexOf(emiNumber);
+  if (paid && at === -1) loan.paidEmis.push(emiNumber);
+  if (!paid && at !== -1) loan.paidEmis.splice(at, 1);
+
+  loan.paidEmis.sort(function (a, b) {
+    return a - b;
+  });
   saveToDisk();
   return loan;
 }
@@ -103,5 +120,6 @@ module.exports = {
   listLoansForMember,
   findLoanById,
   addLoan,
+  setEmiPaid,
   markLoanForeclosed,
 };

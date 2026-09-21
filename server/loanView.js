@@ -1,39 +1,26 @@
 const { generateSchedule, calculateForeclosure, percentRepaid } = require("./emi.js");
 
-function buildLoanView(loan, asOf) {
-  asOf = asOf || new Date();
-
+function buildLoanView(loan) {
   const result = generateSchedule(loan.principal, loan.annualRatePercent, loan.tenureMonths, loan.startDate);
+  const paidEmis = loan.paidEmis || [];
 
-  if (loan.foreclosedAt) {
+  let repaidPrincipal = 0;
+  const schedule = result.schedule.map(function (row) {
+    const paid = paidEmis.indexOf(row.emiNumber) !== -1;
+    if (paid) repaidPrincipal += row.principal;
     return {
-      id: loan.id,
-      memberId: loan.memberId,
-      principal: loan.principal,
-      annualRatePercent: loan.annualRatePercent,
-      tenureMonths: loan.tenureMonths,
-      startDate: loan.startDate,
-      emiAmount: result.emi,
-      totalInterest: result.totalInterest,
-      outstandingBalance: 0,
-      percentRepaid: 100,
-      status: "Closed",
-      foreclosed: true,
-      foreclosedAt: loan.foreclosedAt,
-      foreclosureAmount: loan.foreclosureAmount,
-      schedule: result.schedule,
+      emiNumber: row.emiNumber,
+      dueDate: row.dueDate,
+      emiAmount: row.emiAmount,
+      principal: row.principal,
+      interest: row.interest,
+      balance: row.balance,
+      paid: paid,
     };
-  }
+  });
 
-  const today = asOf.toISOString().slice(0, 10);
-  let outstanding = loan.principal;
-  for (const row of result.schedule) {
-    if (row.dueDate <= today) {
-      outstanding = row.balance;
-    } else {
-      break;
-    }
-  }
+  const foreclosed = Boolean(loan.foreclosedAt);
+  const outstanding = foreclosed ? 0 : loan.principal - repaidPrincipal;
 
   return {
     id: loan.id,
@@ -44,18 +31,19 @@ function buildLoanView(loan, asOf) {
     startDate: loan.startDate,
     emiAmount: result.emi,
     totalInterest: result.totalInterest,
+    paidCount: paidEmis.length,
     outstandingBalance: outstanding,
-    percentRepaid: percentRepaid(loan.principal, outstanding),
+    percentRepaid: foreclosed ? 100 : percentRepaid(loan.principal, outstanding),
     status: outstanding === 0 ? "Closed" : "Active",
-    foreclosed: false,
-    foreclosedAt: null,
-    foreclosureAmount: null,
-    schedule: result.schedule,
+    foreclosed: foreclosed,
+    foreclosedAt: loan.foreclosedAt || null,
+    foreclosureAmount: loan.foreclosureAmount || null,
+    schedule: schedule,
   };
 }
 
-function quoteForeclosure(loan, asOf) {
-  const view = buildLoanView(loan, asOf);
+function quoteForeclosure(loan) {
+  const view = buildLoanView(loan);
   if (view.status === "Closed") {
     throw new Error("Loan is already closed");
   }

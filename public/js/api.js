@@ -53,6 +53,12 @@ var api = {
   addLoan: function (loan) {
     return callApi("/api/loans", { method: "POST", body: JSON.stringify(loan) });
   },
+  markEmiPaid: function (id, emiNumber, paid) {
+    return callApi("/api/loans/" + id + "/emis/" + emiNumber, {
+      method: "POST",
+      body: JSON.stringify({ paid: paid }),
+    });
+  },
   foreclose: function (id) {
     return callApi("/api/loans/" + id + "/foreclose", { method: "POST" });
   },
