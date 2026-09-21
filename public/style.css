@@ -1,0 +1,426 @@
+/* style.css
+   --------------------------------------------------------------------
+   Colours are defined once as variables at the top, and the dark theme
+   just redefines those same variables under body.dark -- so there's one
+   set of rules for the layout rather than two.
+   -------------------------------------------------------------------- */
+
+:root {
+  --page: #f4f6f9;
+  --panel: #ffffff;
+  --line: #dfe3ea;
+  --ink: #1f2430;
+  --ink-soft: #6c7385;
+  --accent: #2f5fd8;
+  --accent-dark: #2448ab;
+  --danger: #c23b3b;
+  --danger-soft: #fdeceb;
+  --ok: #1d9553;
+  --ok-soft: #e7f7ee;
+  --shadow: 0 1px 2px rgba(20, 25, 40, 0.06);
+}
+
+body.dark {
+  --page: #171a21;
+  --panel: #1f232d;
+  --line: #333845;
+  --ink: #e9ecf2;
+  --ink-soft: #99a0b0;
+  --accent: #7b9bf0;
+  --accent-dark: #9bb3f5;
+  --danger: #ef8484;
+  --danger-soft: #3a2323;
+  --ok: #5bd18a;
+  --ok-soft: #1b3527;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--page);
+  color: var(--ink);
+}
+
+h1 {
+  font-size: 1.45rem;
+  margin: 0 0 1rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 0 0 0.9rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.accent {
+  color: var(--accent);
+}
+
+/* ---------- Buttons and inputs ---------- */
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+button:hover {
+  background: var(--accent-dark);
+}
+
+.small-btn {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.small-btn:hover {
+  background: var(--page);
+}
+
+.text-btn {
+  background: none;
+  color: var(--accent);
+  padding: 0;
+  font-weight: 500;
+}
+
+.text-btn:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+.danger-btn {
+  background: var(--danger-soft);
+  color: var(--danger);
+  margin-top: 0.85rem;
+}
+
+.danger-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+input,
+select {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--page);
+  color: var(--ink);
+  min-width: 11rem;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.error-text {
+  color: var(--danger);
+  font-size: 0.88rem;
+  margin: 0.55rem 0 0;
+  min-height: 1.15em;
+}
+
+.note {
+  background: var(--ok-soft);
+  border-radius: 5px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.88rem;
+  margin: 0.85rem 0 0;
+}
+
+/* ---------- Login ---------- */
+
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 21rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.9rem;
+}
+
+.login-box h1 {
+  margin-bottom: 0.15rem;
+}
+
+.login-box label {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.login-box input {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.login-box button {
+  width: 100%;
+  margin-top: 1.1rem;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0.8rem 0 0;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 1.4rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 0.35rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  background: none;
+  color: var(--ink-soft);
+  font-weight: 500;
+  padding: 0.35rem 0.7rem;
+  border-radius: 5px;
+}
+
+.nav-link:hover {
+  background: var(--page);
+  color: var(--ink);
+}
+
+.nav-link.current {
+  background: var(--accent);
+  color: #fff;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ---------- Layout ---------- */
+
+.content {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.6rem 1.4rem 3rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.4rem;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.panel-head h2 {
+  margin: 0;
+}
+
+.search {
+  min-width: 14rem;
+}
+
+.back {
+  margin-bottom: 0.7rem;
+  font-size: 0.9rem;
+}
+
+/* ---------- Forms laid out in a row ---------- */
+
+.row-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: flex-end;
+}
+
+.row-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.readonly-field span:last-child {
+  padding: 0.45rem 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Dashboard cards ---------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.2rem;
+}
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.card-label {
+  color: var(--ink-soft);
+  font-size: 0.83rem;
+  margin-top: 0.1rem;
+}
+
+/* ---------- Tables ---------- */
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.grid th,
+.grid td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.grid th {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.grid tfoot td {
+  border-bottom: none;
+  border-top: 2px solid var(--line);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge.active {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.badge.closed {
+  background: var(--page);
+  color: var(--ink-soft);
+}
+
+/* ---------- Loan summary ---------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+}
+
+.summary .cap {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+}
+
+.summary b {
+  font-size: 1.02rem;
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 40rem) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .content {
+    padding: 1.1rem 0.9rem 2.5rem;
+  }
+
+  .grid {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
