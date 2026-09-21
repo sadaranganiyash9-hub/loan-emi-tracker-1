@@ -131,7 +131,7 @@ cases above.
 ## Done
 
 All the core requirements, plus these bonuses: foreclosure, top-up gating,
-search on both lists, dark mode, and tests (66 checks across two files). Each schedule row
+search on both lists, dark mode, and tests (71 checks across two files). Each schedule row
 also has a small bar showing how that instalment splits, which makes the
 shrinking interest easier to see than the numbers alone.
 

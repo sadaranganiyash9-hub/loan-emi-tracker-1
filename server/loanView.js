@@ -31,7 +31,7 @@ function buildLoanView(loan) {
     startDate: loan.startDate,
     emiAmount: result.emi,
     totalInterest: result.totalInterest,
-    paidCount: paidEmis.length,
+    paidCount: schedule.filter((row) => row.paid).length,
     outstandingBalance: outstanding,
     percentRepaid: foreclosed ? 100 : percentRepaid(loan.principal, outstanding),
     status: outstanding === 0 ? "Closed" : "Active",

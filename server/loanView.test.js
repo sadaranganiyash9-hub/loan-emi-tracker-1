@@ -71,6 +71,30 @@ check("it is Closed", closed.status === "Closed");
 check("it reports as foreclosed", closed.foreclosed === true);
 check("the settlement amount is kept", closed.foreclosureAmount === 84000);
 
+console.log("\nOdd stored data");
+
+// Loans saved before the Paid checkbox existed have no paidEmis field.
+const legacy = {
+  id: "old",
+  memberId: "m1",
+  principal: 100000,
+  annualRatePercent: 8,
+  tenureMonths: 12,
+  startDate: "2026-01-01",
+  foreclosedAt: null,
+  foreclosureAmount: null,
+};
+const legacyView = buildLoanView(legacy);
+check("a loan with no paidEmis field still loads", legacyView.outstandingBalance === 100000);
+check("...and reads as nothing paid", legacyView.paidCount === 0 && legacyView.percentRepaid === 0);
+check("...and is Active", legacyView.status === "Active");
+
+// The API won't store an EMI number outside the tenure, but a hand-edited
+// file could. It must not affect the money or the count.
+const bogus = buildLoanView(loanWith([1, 2, 99]));
+check("an out-of-range EMI number doesn't change the balance", bogus.outstandingBalance === buildLoanView(loanWith([1, 2])).outstandingBalance);
+check("...and isn't counted as paid", bogus.paidCount === 2);
+
 console.log("\nForeclosure quote");
 
 const quote = quoteForeclosure(loanWith([1, 2, 3, 4, 5, 6, 7, 8]));
