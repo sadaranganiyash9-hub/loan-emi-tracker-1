@@ -45,20 +45,3 @@ function debounce(fn, waitMs) {
 function statusPill(status) {
   return '<span class="pill ' + status.toLowerCase() + '">' + escapeHtml(status) + "</span>";
 }
-
-/* the stacked bar in each schedule row: principal versus interest */
-function splitBar(principalPart, interestPart) {
-  var total = principalPart + interestPart;
-  if (total <= 0) return "";
-
-  var principalPercent = (principalPart / total) * 100;
-  var interestPercent = 100 - principalPercent;
-  var tip = "Principal " + money(principalPart) + "  ·  Interest " + money(interestPart);
-
-  return (
-    '<span class="split" title="' + escapeHtml(tip) + '">' +
-    '<i class="principal" style="width:' + principalPercent.toFixed(2) + '%"></i>' +
-    '<i class="interest" style="width:' + interestPercent.toFixed(2) + '%"></i>' +
-    "</span>"
-  );
-}
