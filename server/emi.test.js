@@ -7,23 +7,7 @@ const {
   canTakeTopUp,
   validateLoanInputs,
 } = require("./emi.js");
-
-let passed = 0;
-let failed = 0;
-
-function check(description, isTrue) {
-  if (isTrue) {
-    passed++;
-    console.log("  PASS  " + description);
-  } else {
-    failed++;
-    console.log("  FAIL  " + description);
-  }
-}
-
-function section(title) {
-  console.log("\n" + title);
-}
+const { check, section } = require("./test-helpers.js");
 
 section("The EMI formula");
 
@@ -146,6 +130,3 @@ check("exactly 33% repaid can take a top-up (boundary is inclusive)", canTakeTop
 check("just under 33% repaid cannot", canTakeTopUp(100000, 67001) === false);
 check("20% repaid cannot", canTakeTopUp(100000, 80000) === false);
 check("a brand new loan (0% repaid) cannot", canTakeTopUp(100000, 100000) === false);
-
-console.log("\n" + passed + " passed, " + failed + " failed\n");
-if (failed > 0) process.exit(1);

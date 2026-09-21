@@ -17,7 +17,7 @@ Then open http://localhost:3000 and log in with **admin / admin123** (the form
 comes pre-filled — the login is mock, which the brief allows).
 
 ```bash
-npm test     # runs both test files
+npm test     # 71 checks, one total at the end
 npm run dev  # restarts the server when a file changes
 ```
 
@@ -33,8 +33,9 @@ Data is saved in `data/db.json`. Delete that file to start over.
   it means there's nothing to install or configure to run this.
 - **`Intl.NumberFormat("en-IN")` for currency** — the browser already knows
   Indian grouping (₹1,23,456), so there was no need to write it by hand.
-- **No test framework** — the two test files run on their own with `node` and
-  print PASS/FAIL, which was simpler than adding a dependency.
+- **No test framework** — `node server/tests.js` runs both test files and
+  prints PASS/FAIL per check with one total, which was simpler than adding a
+  dependency.
 
 Files:
 
@@ -43,6 +44,7 @@ server/emi.js         the EMI maths (just functions, no database or HTTP)
 server/emi.test.js    tests for it
 server/loanView.js    works out schedule / outstanding / status for a loan
 server/loanView.test.js  tests for that
+server/tests.js       what `npm test` runs - both files, one total
 server/db.js          reads and writes data/db.json
 server/auth.js        mock login
 server/server.js      the API routes
@@ -131,7 +133,7 @@ cases above.
 ## Done
 
 All the core requirements, plus these bonuses: foreclosure, top-up gating,
-search on both lists, dark mode, and tests (71 checks across two files). Each schedule row
+search on both lists, dark mode, and tests (71 checks). Each schedule row
 also has a small bar showing how that instalment splits, which makes the
 shrinking interest easier to see than the numbers alone.
 
