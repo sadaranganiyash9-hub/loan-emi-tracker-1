@@ -1,4 +1,5 @@
 const {
+  addMonths,
   calculateEMI,
   generateSchedule,
   calculateForeclosure,
@@ -58,6 +59,35 @@ check("the principal portion grows every single month", principalAlwaysRises);
 
 check("first EMI falls due one month after the start date", ref.schedule[0].dueDate === "2026-02-01");
 check("last EMI falls due 12 months after the start date", ref.schedule[11].dueDate === "2027-01-01");
+
+section("Due dates");
+
+check("one month on from 1 Jan is 1 Feb", addMonths("2026-01-01", 1) === "2026-02-01");
+check("twelve months on from 1 Jan is 1 Jan next year", addMonths("2026-01-01", 12) === "2027-01-01");
+
+check("31 Jan + 1 month clamps to 28 Feb", addMonths("2026-01-31", 1) === "2026-02-28");
+check("...and picks the 31st back up in March", addMonths("2026-01-31", 2) === "2026-03-31");
+check("31 Aug + 1 month clamps to 30 Sep", addMonths("2026-08-31", 1) === "2026-09-30");
+check("a leap year gives 29 Feb", addMonths("2024-01-31", 1) === "2024-02-29");
+
+const monthEnd = generateSchedule(100000, 8, 14, "2026-01-31");
+
+let allDatesReal = true;
+for (const row of monthEnd.schedule) {
+  const parts = row.dueDate.split("-").map(Number);
+  const daysInMonth = new Date(Date.UTC(parts[0], parts[1], 0)).getUTCDate();
+  if (parts[2] > daysInMonth) allDatesReal = false;
+}
+check("a loan starting on the 31st never produces an impossible date", allDatesReal);
+
+let monthsStepOnce = true;
+for (let i = 1; i < monthEnd.schedule.length; i++) {
+  const before = monthEnd.schedule[i - 1].dueDate.split("-").map(Number);
+  const after = monthEnd.schedule[i].dueDate.split("-").map(Number);
+  const gap = (after[0] - before[0]) * 12 + (after[1] - before[1]);
+  if (gap !== 1) monthsStepOnce = false;
+}
+check("consecutive due dates are always exactly one month apart", monthsStepOnce);
 
 section("Rounding: every schedule must fully repay the loan");
 

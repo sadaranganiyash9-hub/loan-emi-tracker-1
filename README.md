@@ -110,6 +110,10 @@ every EMI is ticked.
 - Duplicate employee ID → rejected.
 - Foreclosing a closed loan → rejected.
 - Corrupt `db.json` → logged, and the app starts empty instead of crashing.
+- **A loan starting on the 31st** → February falls due on the 28th (29th in a
+  leap year) and the 31st resumes in March, rather than rolling into the next
+  month. Due dates are worked out on the date string rather than with
+  `Date.setMonth`, so the machine's timezone can't shift them either.
 
 ## AI usage
 
@@ -127,7 +131,7 @@ cases above.
 ## Done
 
 All the core requirements, plus these bonuses: foreclosure, top-up gating,
-search on both lists, dark mode, and tests (58 checks across two files). Each schedule row
+search on both lists, dark mode, and tests (66 checks across two files). Each schedule row
 also has a small bar showing how that instalment splits, which makes the
 shrinking interest easier to see than the numbers alone.
 
