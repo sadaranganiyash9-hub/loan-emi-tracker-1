@@ -1,15 +1,7 @@
-// app.js - all the frontend logic: calling the API, remembering
-// login/theme/language in localStorage, and rendering each screen.
-
-// ======================================================================
-// Language and theme
-// ======================================================================
-
 function currentLanguage() {
   return localStorage.getItem("language") === "hi" ? "hi" : "en";
 }
 
-// looks up a label; {placeholders} get replaced from values
 function t(key, values) {
   var dictionary = TRANSLATIONS[currentLanguage()];
   var text = dictionary[key] || TRANSLATIONS.en[key] || key;
@@ -22,8 +14,6 @@ function t(key, values) {
   return text;
 }
 
-// fills in every fixed label; elements carry their key in a data-t
-// attribute (or data-t-placeholder for inputs)
 function applyLanguage() {
   var labels = document.querySelectorAll("[data-t]");
   for (var i = 0; i < labels.length; i++) {
@@ -44,12 +34,6 @@ function applyTheme() {
   document.getElementById("theme-btn").textContent = dark ? "☀️" : "🌙";
 }
 
-// ======================================================================
-// Formatting
-// ======================================================================
-
-// "en-IN" gives Indian grouping (1,23,456 not 123,456) for free.
-// Whole rupees only, as the spec asks.
 var rupeeFormat = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
@@ -68,7 +52,6 @@ function prettyDate(isoDate) {
   });
 }
 
-// escape anything the user typed before it goes into innerHTML
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -83,8 +66,6 @@ function statusPill(status) {
   return '<span class="pill ' + status.toLowerCase() + '">' + escapeHtml(label) + "</span>";
 }
 
-// the small stacked bar in each schedule row, showing how that
-// instalment divides between principal and interest
 function splitBar(principalPart, interestPart) {
   var total = principalPart + interestPart;
   if (total <= 0) return "";
@@ -108,7 +89,6 @@ function splitBar(principalPart, interestPart) {
   );
 }
 
-// small "x% repaid" bar for the loans list
 function miniMeter(percent) {
   var clamped = Math.max(0, Math.min(100, percent));
   return (
@@ -125,10 +105,6 @@ function miniMeter(percent) {
   );
 }
 
-// ======================================================================
-// Talking to the API
-// ======================================================================
-
 async function callApi(url, options) {
   options = options || {};
 
@@ -143,9 +119,6 @@ async function callApi(url, options) {
     body: options.body,
   });
 
-  // A 401 means the saved token is no good, so go back to the login
-  // screen. Not for the login call itself, where a 401 just means the
-  // password was wrong and its own message should show.
   if (response.status === 401 && url !== "/api/login") {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
@@ -193,11 +166,7 @@ var api = {
   },
 };
 
-// ======================================================================
-// Moving between screens
-// ======================================================================
-
-var openLoanId = null; // which loan the detail screen is showing
+var openLoanId = null;
 
 function showLoginScreen() {
   document.getElementById("login-screen").classList.remove("hidden");
@@ -222,7 +191,6 @@ function goTo(viewName) {
   }
   document.getElementById("view-" + viewName).classList.remove("hidden");
 
-  // the loan detail screen keeps "Loans" highlighted
   var railSection = viewName === "loan" ? "loans" : viewName;
   var railLinks = document.querySelectorAll(".rail-link");
   for (var j = 0; j < railLinks.length; j++) {
@@ -236,14 +204,9 @@ function goTo(viewName) {
   if (viewName === "loan" && openLoanId) renderLoanDetail(openLoanId);
 }
 
-// shows an error message, or clears it when given nothing
 function setError(elementId, message) {
   document.getElementById(elementId).textContent = message || "";
 }
-
-// ======================================================================
-// Dashboard
-// ======================================================================
 
 async function renderDashboard() {
   var box = document.getElementById("dashboard-cards");
@@ -264,7 +227,6 @@ async function renderDashboard() {
     outstanding += loans[i].outstandingBalance;
   }
 
-  // guard the no-loans case, where the percentage is meaningless
   var repaidPercent = lent > 0 ? ((lent - outstanding) / lent) * 100 : 0;
 
   var lead =
@@ -303,16 +265,11 @@ function figure(value, label) {
   );
 }
 
-// ======================================================================
-// Members
-// ======================================================================
-
 async function renderMembers(search) {
   var results = await Promise.all([api.getMembers(search), api.getLoans()]);
   var members = results[0];
   var allLoans = results[1];
 
-  // active loan count per member
   var rows = members.map(function (member) {
     var activeCount = allLoans.filter(function (loan) {
       return loan.memberId === member.id && loan.status === "Active";
@@ -349,7 +306,6 @@ async function submitMember(event) {
     monthlySalary: Number(document.getElementById("new-member-salary").value),
   };
 
-  // checked on the server too; this is just a faster response
   if (member.name === "" || member.employeeId === "") {
     setError("member-error", t("name") + " / " + t("employeeId") + " — required");
     return;
@@ -368,10 +324,6 @@ async function submitMember(event) {
     setError("member-error", err.message);
   }
 }
-
-// ======================================================================
-// Loans
-// ======================================================================
 
 async function fillMemberDropdown() {
   var members = await api.getMembers();
@@ -477,14 +429,9 @@ async function submitLoan(event) {
     document.getElementById("loan-search").value = "";
     await renderLoans();
   } catch (err) {
-    // the top-up rule also surfaces here
     setError("loan-error", err.message);
   }
 }
-
-// ======================================================================
-// Loan detail + foreclosure
-// ======================================================================
 
 async function renderLoanDetail(loanId) {
   setError("foreclose-error", "");
@@ -565,10 +512,6 @@ async function foreclose(loan) {
   }
 }
 
-// ======================================================================
-// Report + CSV export
-// ======================================================================
-
 async function renderReport() {
   var rows = await api.getReport();
   var total = 0;
@@ -601,8 +544,6 @@ async function exportCsv() {
   setError("export-error", "");
 
   try {
-    // a plain link can't send the Authorization header, so fetch the
-    // file and hand the browser the blob
     var response = await fetch("/api/report/outstanding.csv", {
       headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     });
@@ -622,10 +563,6 @@ async function exportCsv() {
     setError("export-error", err.message);
   }
 }
-
-// ======================================================================
-// Login / logout
-// ======================================================================
 
 async function submitLogin(event) {
   event.preventDefault();
@@ -650,11 +587,6 @@ function logOut() {
   showLoginScreen();
 }
 
-// ======================================================================
-// Start up: wire everything once the page is ready
-// ======================================================================
-
-// waits until typing stops before searching
 function debounce(fn, waitMs) {
   var timer;
   return function () {
@@ -688,13 +620,10 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.setItem("language", currentLanguage() === "en" ? "hi" : "en");
     applyLanguage();
 
-    // re-render the open screen so text built in JS switches too
     var openView = document.querySelector(".view:not(.hidden)");
     if (openView) goTo(openView.id.replace("view-", ""));
   });
 
-  // currentTarget, not target - the click lands on the icon or label
-  // inside the button, not the button itself
   var railLinks = document.querySelectorAll("[data-goto]");
   for (var i = 0; i < railLinks.length; i++) {
     railLinks[i].addEventListener("click", function (event) {
@@ -716,7 +645,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 200)
   );
 
-  // already logged in from a previous visit
   if (localStorage.getItem("token")) {
     showAppScreen();
   } else {

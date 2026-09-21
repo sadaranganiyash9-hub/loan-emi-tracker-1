@@ -1,6 +1,3 @@
-// emi.test.js - tests for the EMI maths. No test framework needed:
-//     npm test        (or: node server/emi.test.js)
-
 const {
   calculateEMI,
   generateSchedule,
@@ -27,14 +24,10 @@ function section(title) {
   console.log("\n" + title);
 }
 
-// ----------------------------------------------------------------------
 section("The EMI formula");
-// ----------------------------------------------------------------------
 
-// P = 100000, 8% a year, 12 months -> 8698.84, rounds to 8699
 check("100000 at 8% over 12 months gives an EMI of 8699", Math.round(calculateEMI(100000, 8, 12)) === 8699);
 
-// with n = 1 the formula cancels down to P * (1 + r)
 const monthlyRate = 0.08 / 12;
 check(
   "a 1-month loan's EMI is just principal + one month of interest",
@@ -43,9 +36,7 @@ check(
 
 check("a 0% loan simply divides the principal evenly", calculateEMI(12000, 0, 12) === 1000);
 
-// ----------------------------------------------------------------------
 section("The schedule for the reference loan (100000 / 8% / 12 months)");
-// ----------------------------------------------------------------------
 
 const ref = generateSchedule(100000, 8, 12, "2026-01-01");
 
@@ -56,7 +47,6 @@ check("month 1 leaves a balance of 91968", ref.schedule[0].balance === 91968);
 check("month 12 interest is only 58, because barely anything is still owed", ref.schedule[11].interest === 58);
 check("the final balance is exactly 0", ref.schedule[11].balance === 0);
 
-// check this holds for every row, not just the first and last
 let interestAlwaysFalls = true;
 let principalAlwaysRises = true;
 for (let i = 1; i < ref.schedule.length; i++) {
@@ -69,11 +59,8 @@ check("the principal portion grows every single month", principalAlwaysRises);
 check("first EMI falls due one month after the start date", ref.schedule[0].dueDate === "2026-02-01");
 check("last EMI falls due 12 months after the start date", ref.schedule[11].dueDate === "2027-01-01");
 
-// ----------------------------------------------------------------------
 section("Rounding: every schedule must fully repay the loan");
-// ----------------------------------------------------------------------
 
-// awkward numbers on purpose - this is where rounding would go wrong
 const roundingCases = [
   [100000, 12],
   [250000, 24],
@@ -97,9 +84,7 @@ for (const [principal, months] of roundingCases) {
 check("the principal components always add up to exactly the loan amount", allRepaidExactly);
 check("the balance always ends at exactly 0", allClosedAtZero);
 
-// ----------------------------------------------------------------------
 section("Edge cases");
-// ----------------------------------------------------------------------
 
 const oneMonth = generateSchedule(100000, 8, 1, "2026-01-01");
 check("a 1-month loan has a single row", oneMonth.schedule.length === 1);
@@ -117,18 +102,13 @@ check("rejects a negative interest rate", validateLoanInputs(100000, -1, 12) !==
 check("rejects text typed into a number field", validateLoanInputs(NaN, 8, 12) !== null);
 check("accepts sensible input", validateLoanInputs(100000, 8, 12) === null);
 
-// ----------------------------------------------------------------------
 section("Foreclosure");
-// ----------------------------------------------------------------------
 
-// 50000 * 0.08/12 = 333.33 -> 333
 check("settling a 50000 balance at 8% costs 50333", calculateForeclosure(50000, 8) === 50333);
 check("settling always costs more than the balance alone", calculateForeclosure(75000, 8) > 75000);
 check("settling a fully repaid loan costs nothing extra", calculateForeclosure(0, 8) === 0);
 
-// ----------------------------------------------------------------------
 section("Top-up gating (needs 33% repaid)");
-// ----------------------------------------------------------------------
 
 check("60000 left on a 100000 loan is 40% repaid", percentRepaid(100000, 60000) === 40);
 check("40% repaid can take a top-up", canTakeTopUp(100000, 60000) === true);
@@ -137,6 +117,5 @@ check("just under 33% repaid cannot", canTakeTopUp(100000, 67001) === false);
 check("20% repaid cannot", canTakeTopUp(100000, 80000) === false);
 check("a brand new loan (0% repaid) cannot", canTakeTopUp(100000, 100000) === false);
 
-// ----------------------------------------------------------------------
 console.log("\n" + passed + " passed, " + failed + " failed\n");
 if (failed > 0) process.exit(1);

@@ -1,6 +1,3 @@
-// server.js - the Express app: the API routes, plus serving the
-// frontend files out of /public.
-
 const express = require("express");
 const path = require("path");
 
@@ -9,20 +6,14 @@ const { buildLoanView, quoteForeclosure } = require("./loanView.js");
 const { validateLoanInputs, canTakeTopUp, percentRepaid } = require("./emi.js");
 const { checkCredentials, requireLogin, SESSION_TOKEN } = require("./auth.js");
 
-// every loan is 8% per year, reducing balance - kept in one place
 const ANNUAL_RATE_PERCENT = 8;
 
-// how much of an existing loan must be repaid before another is allowed
 const TOP_UP_THRESHOLD_PERCENT = 33;
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
-
-// ======================================================================
-// Login
-// ======================================================================
 
 app.post("/api/login", (req, res) => {
   const body = req.body || {};
@@ -34,14 +25,9 @@ app.post("/api/login", (req, res) => {
   res.json({ token: SESSION_TOKEN, user: { username: body.username } });
 });
 
-// ======================================================================
-// Members
-// ======================================================================
-
 app.get("/api/members", requireLogin, (req, res) => {
   let members = db.listMembers();
 
-  // search on name or employee ID
   const search = (req.query.search || "").trim().toLowerCase();
   if (search !== "") {
     members = members.filter(
@@ -76,14 +62,9 @@ app.post("/api/members", requireLogin, (req, res) => {
   res.status(201).json(member);
 });
 
-// ======================================================================
-// Loans
-// ======================================================================
-
 app.get("/api/loans", requireLogin, (req, res) => {
   const loans = req.query.memberId ? db.listLoansForMember(req.query.memberId) : db.listLoans();
 
-  // attach the member's name so the frontend doesn't have to look it up
   let views = loans.map((loan) => {
     const view = buildLoanView(loan);
     const member = db.findMemberById(loan.memberId);
@@ -92,7 +73,6 @@ app.get("/api/loans", requireLogin, (req, res) => {
     return view;
   });
 
-  // search on member name, employee ID or status
   const search = (req.query.search || "").trim().toLowerCase();
   if (search !== "") {
     views = views.filter(
@@ -120,8 +100,6 @@ app.get("/api/loans/:id", requireLogin, (req, res) => {
   res.json(view);
 });
 
-// If the member has an active loan under 33% repaid they can't take
-// another one. Returns that loan's details, or null if they're clear.
 function findLoanBlockingTopUp(memberId) {
   const existingLoans = db.listLoansForMember(memberId);
 
@@ -154,7 +132,6 @@ app.post("/api/loans", requireLogin, (req, res) => {
     return res.status(400).json({ error: problem });
   }
 
-  // default to today if the form didn't send a date
   const startDate = body.startDate ? String(body.startDate) : new Date().toISOString().slice(0, 10);
   if (isNaN(Date.parse(startDate))) {
     return res.status(400).json({ error: "Start date is not a valid date" });
@@ -177,7 +154,6 @@ app.post("/api/loans", requireLogin, (req, res) => {
   res.status(201).json(buildLoanView(loan));
 });
 
-// settle and close a loan early
 app.post("/api/loans/:id/foreclose", requireLogin, (req, res) => {
   const loan = db.findLoanById(req.params.id);
   if (!loan) {
@@ -195,11 +171,6 @@ app.post("/api/loans/:id/foreclose", requireLogin, (req, res) => {
   res.json(buildLoanView(updated));
 });
 
-// ======================================================================
-// Report
-// ======================================================================
-
-// one row per member: loan count and what they still owe
 function buildOutstandingReport() {
   const allLoans = db.listLoans();
 
@@ -225,7 +196,6 @@ app.get("/api/report/outstanding", requireLogin, (req, res) => {
   res.json(buildOutstandingReport());
 });
 
-// quote a CSV field if it contains a comma, quote or newline
 function csvCell(value) {
   const text = String(value);
   if (/[",\n]/.test(text)) {
@@ -244,9 +214,6 @@ app.get("/api/report/outstanding.csv", requireLogin, (req, res) => {
     );
   }
 
-  // Plain numbers, no "₹" and no thousands separators -- a spreadsheet
-  // needs to read these as numbers, not text. The formatting with
-  // rupee symbols belongs on screen, not in the export.
   const csv = lines.join("\r\n") + "\r\n";
 
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -254,18 +221,12 @@ app.get("/api/report/outstanding.csv", requireLogin, (req, res) => {
   res.send(csv);
 });
 
-// ======================================================================
-// Anything else under /api that doesn't exist
-// ======================================================================
-
 app.use((req, res) => {
   if (req.originalUrl.startsWith("/api/")) {
     return res.status(404).json({ error: "No such endpoint" });
   }
   res.status(404).send("Not found");
 });
-
-// ======================================================================
 
 const PORT = process.env.PORT || 3000;
 

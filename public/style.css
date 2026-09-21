@@ -1,8 +1,4 @@
-/* style.css - colours are variables at the top; body.dark redefines
-   the same ones, so there's a single set of layout rules. */
-
 :root {
-  /* the rail stays dark in both themes, so it has its own colours */
   --rail: #17171f;
   --rail-line: #26262f;
   --rail-ink: #a9a9b8;
@@ -82,7 +78,6 @@ body {
   display: none !important;
 }
 
-/* small uppercase label, used for field labels and column headings */
 .micro {
   display: block;
   font-size: 0.66rem;
@@ -105,7 +100,6 @@ h2 {
   margin: 0 0 1rem;
 }
 
-/* figures line up in columns */
 .num,
 .tally,
 .grid td.num,
@@ -277,7 +271,7 @@ select:focus {
 #app-screen {
   display: flex;
   min-height: 100vh;
-  /* keeps the left column dark below the sticky rail on long pages */
+
   background: linear-gradient(to right, var(--rail) 0 14.5rem, var(--page) 14.5rem);
 }
 
@@ -528,7 +522,6 @@ select:focus {
   letter-spacing: -0.01em;
 }
 
-/* the one lead figure per screen */
 .figure.lead {
   grid-column: span 2;
   border-color: var(--line-strong);
@@ -553,7 +546,6 @@ select:focus {
   margin: 0;
 }
 
-/* repayment meter */
 .meter {
   height: 7px;
   border-radius: 4px;
@@ -605,7 +597,6 @@ select:focus {
   font-weight: 600;
 }
 
-/* status pills */
 .pill {
   display: inline-block;
   padding: 0.12rem 0.55rem;
@@ -674,7 +665,6 @@ select:focus {
   background: var(--series-interest);
 }
 
-/* a compact repaid bar inside the loans table */
 .mini-meter {
   display: flex;
   align-items: center;

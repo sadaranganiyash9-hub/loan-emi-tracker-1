@@ -1,6 +1,3 @@
-// db.js - stores everything in one JSON file (data/db.json), loaded
-// into memory at startup and written back after each change.
-
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
@@ -34,8 +31,6 @@ function newId() {
   return crypto.randomBytes(8).toString("hex");
 }
 
-// ---- Members ----
-
 function listMembers() {
   return data.members.slice().sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -44,7 +39,6 @@ function findMemberById(id) {
   return data.members.find((m) => m.id === id);
 }
 
-// case-insensitive, so "E100" and "e100" are the same person
 function findMemberByEmployeeId(employeeId) {
   return data.members.find((m) => m.employeeId.toLowerCase() === employeeId.toLowerCase());
 }
@@ -61,8 +55,6 @@ function addMember(name, employeeId, monthlySalary) {
   saveToDisk();
   return member;
 }
-
-// ---- Loans ----
 
 function listLoans() {
   return data.loans.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));

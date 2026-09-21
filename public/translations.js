@@ -1,6 +1,3 @@
-// translations.js - labels for the language toggle. Only fixed text is
-// translated; member names and numbers stay as they are.
-
 var TRANSLATIONS = {
   en: {
     staffLogin: "Staff login",
@@ -27,7 +24,6 @@ var TRANSLATIONS = {
     addMember: "Add a member",
     name: "Name",
     employeeId: "Employee / member ID",
-    // the form field mentions the unit, the column heading doesn't
     salaryInput: "Monthly salary (₹)",
     monthlySalary: "Monthly salary",
     allMembers: "All members",

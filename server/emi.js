@@ -1,6 +1,3 @@
-// emi.js - the loan maths. No database or HTTP in here, just numbers
-// in and numbers out, so it can be tested on its own (see emi.test.js).
-
 function calculateEMI(principal, annualRatePercent, months) {
   const monthlyRate = annualRatePercent / 12 / 100;
 
@@ -8,7 +5,6 @@ function calculateEMI(principal, annualRatePercent, months) {
     return principal / months;
   }
 
-  // EMI = P * r * (1+r)^n / ((1+r)^n - 1)
   const growth = Math.pow(1 + monthlyRate, months);
   return (principal * monthlyRate * growth) / (growth - 1);
 }
@@ -25,11 +21,8 @@ function generateSchedule(principal, annualRatePercent, months, startDate) {
     const dueDate = new Date(startDate);
     dueDate.setMonth(dueDate.getMonth() + i);
 
-    // interest is on what's still owed, not on the original amount
     const interest = Math.round(balance * monthlyRate);
 
-    // on the last month, pay off whatever is left instead of using the
-    // EMI, so the balance ends at exactly 0 after rounding
     const isLastRow = i === months;
     const principalPaid = isLastRow ? balance : emi - interest;
 
@@ -49,8 +42,6 @@ function generateSchedule(principal, annualRatePercent, months, startDate) {
   return { emi: emi, totalInterest: totalInterest, schedule: schedule };
 }
 
-// closing a loan early: pay the balance plus one more month of
-// interest, and the rest of the interest is waived
 function calculateForeclosure(outstandingBalance, annualRatePercent) {
   const monthlyRate = annualRatePercent / 12 / 100;
   const thisMonthsInterest = Math.round(outstandingBalance * monthlyRate);
@@ -62,12 +53,10 @@ function percentRepaid(principal, outstandingBalance) {
   return ((principal - outstandingBalance) / principal) * 100;
 }
 
-// a member needs 33% of their current loan paid off before taking another
 function canTakeTopUp(principal, outstandingBalance) {
   return percentRepaid(principal, outstandingBalance) >= 33;
 }
 
-// returns an error message, or null if the input is fine
 function validateLoanInputs(principal, annualRatePercent, months) {
   if (typeof principal !== "number" || !isFinite(principal) || principal <= 0) {
     return "Principal must be a positive number";

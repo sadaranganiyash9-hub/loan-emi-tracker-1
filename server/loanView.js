@@ -1,11 +1,5 @@
-// loanView.js - works out the schedule, outstanding balance and status
-// for a stored loan. These aren't saved in the database, just calculated
-// from the loan's principal / rate / tenure / start date each time.
-
 const { generateSchedule, calculateForeclosure, percentRepaid } = require("./emi.js");
 
-// There's no "mark EMI as paid" feature, so an EMI counts as paid once
-// its due date has passed (see the README).
 function buildLoanView(loan, asOf) {
   asOf = asOf || new Date();
 
@@ -31,7 +25,6 @@ function buildLoanView(loan, asOf) {
     };
   }
 
-  // the balance left by the most recent EMI that's already due
   const today = asOf.toISOString().slice(0, 10);
   let outstanding = loan.principal;
   for (const row of result.schedule) {
