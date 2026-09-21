@@ -94,9 +94,58 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function statusBadge(status) {
+function statusPill(status) {
   var label = status === "Active" ? t("active") : t("closed");
-  return '<span class="badge ' + status.toLowerCase() + '">' + escapeHtml(label) + "</span>";
+  return '<span class="pill ' + status.toLowerCase() + '">' + escapeHtml(label) + "</span>";
+}
+
+/**
+ * The little stacked bar in each schedule row, showing how that one
+ * instalment divides between principal and interest.
+ *
+ * It's the same information as the two money columns beside it, drawn
+ * so the trend down the column is visible at a glance: interest-heavy
+ * at the top, almost all principal by the last row. The exact figures
+ * stay in the table, so nothing depends on being able to see colour.
+ */
+function splitBar(principalPart, interestPart) {
+  var total = principalPart + interestPart;
+  if (total <= 0) return "";
+
+  var principalPercent = (principalPart / total) * 100;
+  var interestPercent = 100 - principalPercent;
+
+  var tip = t("principalPart") + " " + money(principalPart) + "  ·  " + t("interestPart") + " " + money(interestPart);
+
+  return (
+    '<span class="split" title="' +
+    escapeHtml(tip) +
+    '">' +
+    '<i class="principal" style="width:' +
+    principalPercent.toFixed(2) +
+    '%"></i>' +
+    '<i class="interest" style="width:' +
+    interestPercent.toFixed(2) +
+    '%"></i>' +
+    "</span>"
+  );
+}
+
+/** A small "x% repaid" bar for the loans list. */
+function miniMeter(percent) {
+  var clamped = Math.max(0, Math.min(100, percent));
+  return (
+    '<span class="mini-meter" title="' +
+    escapeHtml(clamped.toFixed(1) + "% " + t("repaid")) +
+    '">' +
+    '<span class="track"><i style="width:' +
+    clamped.toFixed(2) +
+    '%"></i></span>' +
+    "<span>" +
+    clamped.toFixed(0) +
+    "%</span>" +
+    "</span>"
+  );
 }
 
 // ======================================================================
@@ -181,9 +230,13 @@ function showLoginScreen() {
 }
 
 function showAppScreen() {
+  var username = localStorage.getItem("username") || "";
+
   document.getElementById("login-screen").classList.add("hidden");
   document.getElementById("app-screen").classList.remove("hidden");
-  document.getElementById("signed-in-as").textContent = localStorage.getItem("username") || "";
+  document.getElementById("signed-in-as").textContent = username;
+  document.getElementById("rail-avatar").textContent = username.charAt(0) || "?";
+
   goTo("dashboard");
 }
 
@@ -194,9 +247,12 @@ function goTo(viewName) {
   }
   document.getElementById("view-" + viewName).classList.remove("hidden");
 
-  var navLinks = document.querySelectorAll(".nav-link");
-  for (var j = 0; j < navLinks.length; j++) {
-    navLinks[j].classList.toggle("current", navLinks[j].getAttribute("data-goto") === viewName);
+  // The loan detail screen is reached from the loans list, so keep
+  // "Loans" marked as the current section while it's open.
+  var railSection = viewName === "loan" ? "loans" : viewName;
+  var railLinks = document.querySelectorAll(".rail-link");
+  for (var j = 0; j < railLinks.length; j++) {
+    railLinks[j].classList.toggle("current", railLinks[j].getAttribute("data-goto") === railSection);
   }
 
   if (viewName === "dashboard") renderDashboard();
@@ -216,8 +272,8 @@ function setError(elementId, message) {
 // ======================================================================
 
 async function renderDashboard() {
-  var cards = document.getElementById("dashboard-cards");
-  cards.innerHTML = '<p class="muted">' + t("loading") + "</p>";
+  var box = document.getElementById("dashboard-cards");
+  box.innerHTML = '<p class="empty">' + t("loading") + "</p>";
 
   var results = await Promise.all([api.getMembers(), api.getLoans()]);
   var members = results[0];
@@ -226,24 +282,54 @@ async function renderDashboard() {
   var active = loans.filter(function (loan) {
     return loan.status === "Active";
   });
-  var outstanding = loans.reduce(function (sum, loan) {
-    return sum + loan.outstandingBalance;
-  }, 0);
 
-  cards.innerHTML =
-    card(members.length, t("totalMembers")) +
-    card(active.length, t("activeLoans")) +
-    card(loans.length - active.length, t("closedLoans")) +
-    card(money(outstanding), t("totalOutstandingCard"));
+  var lent = 0;
+  var outstanding = 0;
+  for (var i = 0; i < loans.length; i++) {
+    lent += loans[i].principal;
+    outstanding += loans[i].outstandingBalance;
+  }
+
+  // Share of everything ever lent that has now been repaid. Guarded
+  // against the no-loans case, where the percentage is meaningless.
+  var repaidPercent = lent > 0 ? ((lent - outstanding) / lent) * 100 : 0;
+
+  // One lead figure carries the headline number, with the total lent
+  // folded into its caption rather than taking a tile of its own. The
+  // rest are plain counts, so they stay small.
+  var lead =
+    '<div class="figure lead">' +
+    '<span class="micro">' +
+    escapeHtml(t("totalOutstandingCard")) +
+    "</span>" +
+    '<b class="hero">' +
+    escapeHtml(money(outstanding)) +
+    "</b>" +
+    (lent > 0
+      ? '<div class="meter"><span style="width:' + repaidPercent.toFixed(2) + '%"></span></div>' +
+        '<span class="figure-foot"><b>' +
+        repaidPercent.toFixed(1) +
+        "%</b> " +
+        escapeHtml(t("repaidOfLent", { total: money(lent) })) +
+        "</span>"
+      : '<span class="figure-foot">' + escapeHtml(t("noLoansYetFoot")) + "</span>") +
+    "</div>";
+
+  box.className = "figures";
+  box.innerHTML =
+    lead +
+    figure(members.length, t("totalMembers")) +
+    figure(active.length, t("activeLoans")) +
+    figure(loans.length - active.length, t("closedLoans"));
 }
 
-function card(value, label) {
+function figure(value, label) {
   return (
-    '<div class="card"><div class="card-value">' +
-    escapeHtml(value) +
-    '</div><div class="card-label">' +
+    '<div class="figure"><span class="micro">' +
     escapeHtml(label) +
-    "</div></div>"
+    "</span><b>" +
+    escapeHtml(value) +
+    "</b></div>"
   );
 }
 
@@ -265,13 +351,13 @@ async function renderMembers(search) {
     }).length;
 
     return (
-      "<tr><td>" +
+      '<tr><td class="name">' +
       escapeHtml(member.name) +
       "</td><td>" +
       escapeHtml(member.employeeId) +
-      "</td><td>" +
+      '</td><td class="num">' +
       money(member.monthlySalary) +
-      "</td><td>" +
+      '</td><td class="num">' +
       activeCount +
       "</td></tr>"
     );
@@ -358,21 +444,23 @@ async function renderLoans(search) {
   document.getElementById("loan-rows").innerHTML = loans
     .map(function (loan) {
       return (
-        "<tr><td>" +
+        '<tr><td class="name">' +
         escapeHtml(loan.memberName) +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(loan.principal) +
-        "</td><td>" +
+        '</td><td class="num">' +
         loan.tenureMonths +
         " " +
         t("months") +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(loan.emiAmount) +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(loan.outstandingBalance) +
         "</td><td>" +
-        statusBadge(loan.status) +
-        '</td><td><button type="button" class="text-btn open-loan" data-loan="' +
+        miniMeter(loan.percentRepaid) +
+        "</td><td>" +
+        statusPill(loan.status) +
+        '</td><td><button type="button" class="link open-loan" data-loan="' +
         loan.id +
         '">' +
         t("viewSchedule") +
@@ -391,7 +479,7 @@ async function renderLoans(search) {
   var openButtons = document.querySelectorAll(".open-loan");
   for (var i = 0; i < openButtons.length; i++) {
     openButtons[i].addEventListener("click", function (event) {
-      openLoanId = event.target.getAttribute("data-loan");
+      openLoanId = event.currentTarget.getAttribute("data-loan");
       goTo("loan");
     });
   }
@@ -450,11 +538,15 @@ async function renderLoanDetail(loanId) {
   document.getElementById("sum-principal").textContent = money(loan.principal);
   document.getElementById("sum-tenure").textContent = loan.tenureMonths + " " + t("months");
   document.getElementById("sum-rate").textContent = loan.annualRatePercent + "% p.a.";
-  document.getElementById("sum-emi").textContent = money(loan.emiAmount) + " " + t("perMonth");
+  document.getElementById("sum-emi").textContent = money(loan.emiAmount);
   document.getElementById("sum-interest").textContent = money(loan.totalInterest);
   document.getElementById("sum-outstanding").textContent = money(loan.outstandingBalance);
   document.getElementById("sum-repaid").textContent = loan.percentRepaid.toFixed(1) + "%";
-  document.getElementById("sum-status").innerHTML = statusBadge(loan.status);
+  document.getElementById("sum-status").innerHTML = statusPill(loan.status);
+
+  var meterFill = document.getElementById("repaid-meter-fill");
+  meterFill.style.width = Math.max(0, Math.min(100, loan.percentRepaid)).toFixed(2) + "%";
+  document.getElementById("repaid-meter").title = loan.percentRepaid.toFixed(1) + "% " + t("repaid");
 
   var note = document.getElementById("foreclosed-note");
   var button = document.getElementById("foreclose-btn");
@@ -479,17 +571,19 @@ async function renderLoanDetail(loanId) {
   document.getElementById("schedule-rows").innerHTML = loan.schedule
     .map(function (row) {
       return (
-        "<tr><td>" +
+        '<tr><td class="num">' +
         row.emiNumber +
         "</td><td>" +
         prettyDate(row.dueDate) +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(row.emiAmount) +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(row.principal) +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(row.interest) +
         "</td><td>" +
+        splitBar(row.principal, row.interest) +
+        '</td><td class="num">' +
         money(row.balance) +
         "</td></tr>"
       );
@@ -521,13 +615,13 @@ async function renderReport() {
     .map(function (row) {
       total += row.totalOutstanding;
       return (
-        "<tr><td>" +
+        '<tr><td class="name">' +
         escapeHtml(row.memberName) +
         "</td><td>" +
         escapeHtml(row.employeeId) +
-        "</td><td>" +
+        '</td><td class="num">' +
         row.loanCount +
-        "</td><td>" +
+        '</td><td class="num">' +
         money(row.totalOutstanding) +
         "</td></tr>"
       );
@@ -639,10 +733,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (openView) goTo(openView.id.replace("view-", ""));
   });
 
-  var navLinks = document.querySelectorAll("[data-goto]");
-  for (var i = 0; i < navLinks.length; i++) {
-    navLinks[i].addEventListener("click", function (event) {
-      goTo(event.target.getAttribute("data-goto"));
+  // currentTarget, not target: these buttons contain an icon and a
+  // label, so a click usually lands on a child element rather than on
+  // the button that carries the data-goto attribute.
+  var railLinks = document.querySelectorAll("[data-goto]");
+  for (var i = 0; i < railLinks.length; i++) {
+    railLinks[i].addEventListener("click", function (event) {
+      goTo(event.currentTarget.getAttribute("data-goto"));
     });
   }
 

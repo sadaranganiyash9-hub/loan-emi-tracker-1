@@ -109,6 +109,7 @@ show up.
 | --- | --- |
 | **Node + Express** | Suggested in the brief, and the routing needs here are simple enough that Express's own API is all the structure required. |
 | **Plain JS/HTML/CSS frontend, no framework** | The app is six screens of forms and tables. React would have added a build step and a dependency tree without making any of those screens simpler. No bundler means what's in the files is exactly what runs in the browser. |
+| **A fixed left rail for navigation** | The sections are a flat list that never grows, so a persistent vertical rail suits them better than a top bar — it leaves the full width for tables, which is what most of these screens are. The rail stays dark in both themes so the app has one constant it's recognisable by. |
 | **A JSON file for storage** | The brief allows "SQLite / Postgres / or in-memory seed data — your call". At this size a real database only adds setup steps for whoever runs it. A file also survives a restart, which pure in-memory wouldn't. |
 | **`Intl.NumberFormat("en-IN")` for currency** | The browser already knows Indian digit grouping (₹1,23,456), so hand-rolling the 2-2-3 grouping would just be a worse version of something built in. |
 | **No test framework** | `node server/emi.test.js` needs nothing installed and prints PASS/FAIL per check. A framework would have been more setup than the tests themselves. |
@@ -224,8 +225,20 @@ All six from the brief are implemented:
 - [x] **Search / filter** — on the members list (name or ID) and the loans list
       (member, ID, or status, so typing "closed" filters to closed loans).
       Debounced so it doesn't fire on every keystroke.
-- [x] **Dark mode + a considered UI** — a toggle in the header, remembered
-      between visits.
+- [x] **Dark mode + a considered UI** — a toggle in the rail, remembered between
+      visits. Both themes use the same layout rules; only the colour variables
+      are redefined.
+- [x] **The schedule split bars** (not asked for, but it's the point of the
+      whole exercise). Every row of the EMI schedule carries a small stacked bar
+      showing how that instalment divides. Read down the column and the orange
+      interest segment visibly shrinks to almost nothing — reducing balance made
+      visible instead of just tabulated. The loans list and the loan detail also
+      show a "repaid" meter.
+
+      The two bar colours weren't picked by eye: they were checked for
+      colour-blind separation and for contrast against both the light and dark
+      surfaces. The exact figures are in the adjacent columns either way, so the
+      table never depends on being able to distinguish the colours.
 - [x] **Tests for the EMI calculation** — 37 checks via `npm test`.
 - [x] **Multi-language UI** — English / Hindi toggle, also remembered. Fixed
       labels are translated; member names and numbers are left as typed.

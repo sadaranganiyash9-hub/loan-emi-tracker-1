@@ -1,38 +1,78 @@
 /* style.css
-   --------------------------------------------------------------------
-   Colours are defined once as variables at the top, and the dark theme
-   just redefines those same variables under body.dark -- so there's one
-   set of rules for the layout rather than two.
-   -------------------------------------------------------------------- */
+   ======================================================================
+   Layout is a fixed dark rail on the left with the workspace beside it.
+   The rail stays dark in both themes on purpose — it's the one constant
+   the app is recognisable by.
+
+   Colours are declared once as variables. body.dark redefines the same
+   variables, so there is a single set of layout rules rather than two.
+
+   The two series colours (principal / interest, used by the schedule
+   bars) were checked for colour-blind separation and contrast against
+   these exact surfaces rather than picked by eye.
+   ====================================================================== */
 
 :root {
-  --page: #f4f6f9;
-  --panel: #ffffff;
-  --line: #dfe3ea;
-  --ink: #1f2430;
-  --ink-soft: #6c7385;
-  --accent: #2f5fd8;
-  --accent-dark: #2448ab;
-  --danger: #c23b3b;
-  --danger-soft: #fdeceb;
-  --ok: #1d9553;
-  --ok-soft: #e7f7ee;
-  --shadow: 0 1px 2px rgba(20, 25, 40, 0.06);
+  /* the rail is dark in both themes, so it carries its own tokens */
+  --rail: #17171f;
+  --rail-line: #26262f;
+  --rail-ink: #a9a9b8;
+  --rail-ink-strong: #ffffff;
+  --rail-accent: #9085e9;
+
+  --page: #f5f4f1;
+  --surface: #ffffff;
+  --line: #e4e2dc;
+  --line-strong: #d3d0c8;
+  --ink: #14141a;
+  --ink-2: #5b5a63;
+  --ink-muted: #6f6e77;
+
+  --accent: #4a3aa7;
+  --accent-hover: #3d3090;
+  --accent-ink: #ffffff;
+  --accent-wash: #efedfa;
+
+  --series-principal: #2a78d6;
+  --series-interest: #eb6834;
+  --meter-track: #cde2fb;
+
+  --ok: #0ca30c;
+  --ok-wash: #e6f6e6;
+  --danger: #d03b3b;
+  --danger-wash: #fbeced;
+
+  --radius: 7px;
 }
 
 body.dark {
-  --page: #171a21;
-  --panel: #1f232d;
-  --line: #333845;
-  --ink: #e9ecf2;
-  --ink-soft: #99a0b0;
-  --accent: #7b9bf0;
-  --accent-dark: #9bb3f5;
+  --rail: #101016;
+  --rail-line: #22222b;
+  --rail-ink: #9d9caa;
+  --rail-ink-strong: #ffffff;
+  --rail-accent: #9085e9;
+
+  --page: #16161c;
+  --surface: #1c1c23;
+  --line: #2c2c36;
+  --line-strong: #3a3a46;
+  --ink: #f0eff4;
+  --ink-2: #a8a7b2;
+  --ink-muted: #85848f;
+
+  --accent: #9085e9;
+  --accent-hover: #a49bee;
+  --accent-ink: #14141a;
+  --accent-wash: #262233;
+
+  --series-principal: #3987e5;
+  --series-interest: #d95926;
+  --meter-track: #184f95;
+
+  --ok: #0ca30c;
+  --ok-wash: #16301f;
   --danger: #ef8484;
-  --danger-soft: #3a2323;
-  --ok: #5bd18a;
-  --ok-soft: #1b3527;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --danger-wash: #37232a;
 }
 
 * {
@@ -41,383 +81,694 @@ body.dark {
 
 body {
   margin: 0;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 15px;
   line-height: 1.5;
   background: var(--page);
   color: var(--ink);
-}
-
-h1 {
-  font-size: 1.45rem;
-  margin: 0 0 1rem;
-}
-
-h2 {
-  font-size: 1rem;
-  margin: 0 0 0.9rem;
+  -webkit-font-smoothing: antialiased;
 }
 
 .hidden {
   display: none !important;
 }
 
-.muted {
-  color: var(--ink-soft);
+/* Uppercase micro-label — used for every field label, column heading
+   and figure caption, which is most of what gives the app its look. */
+.micro {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
 }
 
-.small {
-  font-size: 0.85rem;
+h1 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0.1rem 0 0;
 }
 
-.accent {
-  color: var(--accent);
+h2 {
+  font-size: 0.95rem;
+  font-weight: 650;
+  margin: 0 0 1rem;
 }
 
-/* ---------- Buttons and inputs ---------- */
+/* Money and other figures line up in columns. */
+.num,
+.tally,
+.grid td.num,
+.grid th.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ====================== buttons & inputs ====================== */
 
 button {
   font: inherit;
   cursor: pointer;
   border: none;
-  border-radius: 5px;
-  padding: 0.5rem 1rem;
+  background: none;
+  color: inherit;
+}
+
+.primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.05rem;
+  border-radius: var(--radius);
+}
+.primary:hover {
+  background: var(--accent-hover);
+}
+.primary.wide {
+  width: 100%;
+  padding: 0.65rem;
 }
 
-button:hover {
-  background: var(--accent-dark);
-}
-
-.small-btn {
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--line);
-  padding: 0.3rem 0.55rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.small-btn:hover {
-  background: var(--page);
-}
-
-.text-btn {
-  background: none;
-  color: var(--accent);
-  padding: 0;
-  font-weight: 500;
-}
-
-.text-btn:hover {
-  background: none;
-  text-decoration: underline;
-}
-
-.danger-btn {
-  background: var(--danger-soft);
+.danger {
+  background: var(--danger-wash);
   color: var(--danger);
-  margin-top: 0.85rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.05rem;
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.danger:hover {
+  background: var(--danger);
+  color: var(--surface);
 }
 
-.danger-btn:hover {
-  background: var(--danger);
-  color: #fff;
+.crumb {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0;
+}
+.crumb:hover {
+  color: var(--accent);
+}
+
+.link {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0;
+}
+.link:hover {
+  text-decoration: underline;
 }
 
 input,
 select {
   font: inherit;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: var(--page);
+  font-size: 0.92rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: var(--ink);
   min-width: 11rem;
 }
-
 input:focus,
 select:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+  border-color: transparent;
 }
 
 .error-text {
   color: var(--danger);
-  font-size: 0.88rem;
-  margin: 0.55rem 0 0;
+  font-size: 0.86rem;
+  margin: 0.6rem 0 0;
   min-height: 1.15em;
 }
 
-.note {
-  background: var(--ok-soft);
-  border-radius: 5px;
-  padding: 0.55rem 0.8rem;
+.banner {
+  background: var(--ok-wash);
+  color: var(--ink);
+  border-left: 3px solid var(--ok);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.7rem 1rem;
   font-size: 0.88rem;
-  margin: 0.85rem 0 0;
+  margin: 0 0 1.2rem;
 }
 
-/* ---------- Login ---------- */
+.empty {
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  margin: 0.2rem 0 0;
+}
+
+/* ========================== login ========================== */
 
 #login-screen {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--rail);
 }
 
 .login-box {
   width: 100%;
   max-width: 21rem;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 1.9rem;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 2rem 1.9rem 1.7rem;
+}
+
+.login-mark,
+.rail-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  font-size: 1.15rem;
 }
 
 .login-box h1 {
-  margin-bottom: 0.15rem;
+  font-size: 1.2rem;
+  margin-top: 1rem;
 }
-
+.login-box .sub {
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  margin: 0.15rem 0 1.4rem;
+}
 .login-box label {
   display: block;
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: var(--ink-soft);
+  margin-bottom: 0.9rem;
 }
-
+.login-box .micro {
+  margin-bottom: 0.3rem;
+}
 .login-box input {
   width: 100%;
-  margin-top: 0.25rem;
 }
-
-.login-box button {
-  width: 100%;
-  margin-top: 1.1rem;
-}
-
 .hint {
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-  margin: 0.8rem 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  margin: 0.9rem 0 0;
+  text-align: center;
 }
 
-/* ---------- Top bar ---------- */
+/* =========================== shell =========================== */
 
-.topbar {
+#app-screen {
+  display: flex;
+  min-height: 100vh;
+  /* The rail is sticky and one viewport tall, so on a long page the
+     strip it sits in would otherwise show the page colour beneath it.
+     Painting the rail colour into that column keeps the left edge dark
+     for the full height of the document. */
+  background: linear-gradient(to right, var(--rail) 0 14.5rem, var(--page) 14.5rem);
+}
+
+.rail {
+  width: 14.5rem;
+  flex-shrink: 0;
+  background: var(--rail);
+  color: var(--rail-ink);
+  display: flex;
+  flex-direction: column;
+  padding: 1.3rem 0.9rem 1.1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.rail-brand {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  padding: 0.7rem 1.4rem;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line);
+  gap: 0.65rem;
+  padding: 0 0.35rem;
+  margin-bottom: 2rem;
+}
+.rail-name {
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--rail-ink-strong);
+  letter-spacing: -0.005em;
+}
+.rail-name em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--rail-ink);
 }
 
-.brand {
-  font-weight: 700;
+.rail-heading {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6c6b7c;
+  padding: 0 0.6rem;
+  margin-bottom: 0.6rem;
 }
 
-.nav {
+.rail-nav {
   display: flex;
-  gap: 0.35rem;
+  flex-direction: column;
+  gap: 0.15rem;
   flex: 1;
-  flex-wrap: wrap;
 }
 
-.nav-link {
-  background: none;
-  color: var(--ink-soft);
-  font-weight: 500;
-  padding: 0.35rem 0.7rem;
-  border-radius: 5px;
-}
-
-.nav-link:hover {
-  background: var(--page);
-  color: var(--ink);
-}
-
-.nav-link.current {
-  background: var(--accent);
-  color: #fff;
-}
-
-.topbar-right {
+.rail-link {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.7rem;
+  padding: 0.58rem 0.6rem;
+  border-radius: var(--radius);
+  font-size: 0.89rem;
+  font-weight: 500;
+  color: var(--rail-ink);
+  text-align: left;
+  /* space for the active marker so labels never shift */
+  border-left: 2px solid transparent;
+}
+.rail-link svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.rail-link:hover {
+  background: #1f1f29;
+  color: var(--rail-ink-strong);
+}
+.rail-link.current {
+  background: #20202b;
+  color: var(--rail-ink-strong);
+  border-left-color: var(--rail-accent);
+  font-weight: 600;
+}
+.rail-link.current svg {
+  color: var(--rail-accent);
+  opacity: 1;
 }
 
-/* ---------- Layout ---------- */
-
-.content {
-  max-width: 62rem;
-  margin: 0 auto;
-  padding: 1.6rem 1.4rem 3rem;
+.rail-foot {
+  border-top: 1px solid var(--rail-line);
+  padding-top: 0.9rem;
+  margin-top: 0.9rem;
 }
+.rail-toggles {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+.chip {
+  flex: 1;
+  border: 1px solid var(--rail-line);
+  border-radius: var(--radius);
+  padding: 0.32rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--rail-ink);
+  text-align: center;
+}
+.chip:hover {
+  background: #1f1f29;
+  color: var(--rail-ink-strong);
+}
+
+.rail-user {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0 0.2rem;
+}
+.rail-avatar {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--rail-accent);
+  color: #17171f;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.rail-user-name {
+  flex: 1;
+  font-size: 0.82rem;
+  color: var(--rail-ink-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rail-out {
+  font-size: 0.75rem;
+  color: var(--rail-ink);
+}
+.rail-out:hover {
+  color: var(--rail-accent);
+}
+
+.workspace {
+  flex: 1;
+  min-width: 0;
+  padding: 1.9rem 2.2rem 3.5rem;
+  max-width: 70rem;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+/* =========================== panels =========================== */
 
 .panel {
-  background: var(--panel);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 1.2rem 1.4rem;
-  margin-bottom: 1.4rem;
+  border-radius: 10px;
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.3rem;
 }
 
 .panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.9rem;
+  gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 0.9rem;
+  margin-bottom: 1rem;
 }
-
 .panel-head h2 {
   margin: 0;
 }
+.panel-note {
+  color: var(--ink-muted);
+  font-size: 0.83rem;
+  margin: -0.4rem 0 1rem;
+  max-width: 48rem;
+}
 
+.tally {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
 .search {
   min-width: 14rem;
 }
 
-.back {
-  margin-bottom: 0.7rem;
-  font-size: 0.9rem;
-}
-
-/* ---------- Forms laid out in a row ---------- */
-
 .row-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.9rem;
+  gap: 0.85rem;
   align-items: flex-end;
 }
-
 .row-form label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.82rem;
-  color: var(--ink-soft);
+  gap: 0.3rem;
 }
 
-.readonly-field span:last-child {
-  padding: 0.45rem 0;
-  color: var(--ink);
-  font-weight: 600;
+.rate-stamp {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.1rem 0.75rem 0.1rem 0;
+}
+.rate-stamp b {
+  font-size: 0.86rem;
+  padding-top: 0.2rem;
 }
 
-/* ---------- Dashboard cards ---------- */
+/* ====================== dashboard figures ====================== */
 
-.cards {
+.figures {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.3rem;
 }
 
-.card {
-  background: var(--panel);
+.figure {
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 1.1rem 1.2rem;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+}
+.figure b {
+  display: block;
+  font-size: 1.28rem;
+  font-weight: 650;
+  margin-top: 0.3rem;
+  letter-spacing: -0.01em;
 }
 
-.card-value {
-  font-size: 1.5rem;
+/* the one lead figure per screen */
+.figure.lead {
+  grid-column: span 2;
+  border-color: var(--line-strong);
+}
+.figure .hero {
+  font-size: 2.3rem;
   font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-top: 0.35rem;
+}
+.figure-foot {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin-top: 0.5rem;
+}
+.figure-foot b {
+  display: inline;
+  font-size: inherit;
+  color: var(--ink);
+  margin: 0;
 }
 
-.card-label {
-  color: var(--ink-soft);
-  font-size: 0.83rem;
-  margin-top: 0.1rem;
+/* repayment meter: fill in the accent, track a lighter step of the
+   same ramp, so the state reads across the whole bar */
+.meter {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--meter-track);
+  overflow: hidden;
+  margin-top: 0.85rem;
+}
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--series-principal);
 }
 
-/* ---------- Tables ---------- */
+/* ========================== tables ========================== */
 
 .grid {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.89rem;
 }
-
 .grid th,
 .grid td {
   text-align: left;
-  padding: 0.55rem 0.7rem;
+  padding: 0.6rem 0.75rem;
   border-bottom: 1px solid var(--line);
 }
-
 .grid th {
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
+  border-bottom-color: var(--line-strong);
+  white-space: nowrap;
 }
-
+.grid tbody tr:last-child td {
+  border-bottom: none;
+}
+.grid tbody tr:hover td {
+  background: var(--accent-wash);
+}
 .grid tfoot td {
   border-bottom: none;
-  border-top: 2px solid var(--line);
+  border-top: 2px solid var(--line-strong);
+  padding-top: 0.8rem;
+}
+.grid .name {
+  font-weight: 600;
 }
 
-.badge {
+/* status pills */
+.pill {
   display: inline-block;
-  padding: 0.1rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 0.12rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
-
-.badge.active {
-  background: var(--ok-soft);
+.pill.active {
+  background: var(--ok-wash);
   color: var(--ok);
 }
-
-.badge.closed {
+.pill.closed {
   background: var(--page);
-  color: var(--ink-soft);
+  color: var(--ink-muted);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
 }
 
-/* ---------- Loan summary ---------- */
+/* ================= the principal / interest split ================= */
+/* A 2px gap in the surface colour separates the two segments; the
+   outer ends are the data ends and carry the 4px rounding. */
 
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: 1rem;
+.split {
+  display: flex;
+  gap: 2px;
+  width: 5.5rem;
+  height: 8px;
 }
-
-.summary .cap {
+.split i {
   display: block;
-  font-size: 0.76rem;
-  color: var(--ink-soft);
+  height: 100%;
+}
+.split i:first-child {
+  border-radius: 4px 0 0 4px;
+}
+.split i:last-child {
+  border-radius: 0 4px 4px 0;
+}
+.split .principal {
+  background: var(--series-principal);
+}
+.split .interest {
+  background: var(--series-interest);
 }
 
-.summary b {
-  font-size: 1.02rem;
+.legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.swatch.principal {
+  background: var(--series-principal);
+}
+.swatch.interest {
+  background: var(--series-interest);
 }
 
-/* ---------- Narrow screens ---------- */
+/* a compact repaid bar inside the loans table */
+.mini-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+.mini-meter .track {
+  width: 3rem;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--meter-track);
+  overflow: hidden;
+}
+.mini-meter .track i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--series-principal);
+}
+.mini-meter span {
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
 
-@media (max-width: 40rem) {
-  .topbar {
+/* ========================= narrow screens ========================= */
+
+@media (max-width: 56rem) {
+  #app-screen {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.7rem;
   }
-
-  .content {
-    padding: 1.1rem 0.9rem 2.5rem;
+  #app-screen {
+    /* the rail sits on top on narrow screens, so no side column */
+    background: var(--page);
   }
-
+  .rail {
+    width: 100%;
+    height: auto;
+    position: static;
+    padding: 0.9rem 1rem;
+  }
+  .rail-brand {
+    margin-bottom: 1rem;
+  }
+  .rail-heading {
+    display: none;
+  }
+  .rail-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .rail-link {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+  }
+  .rail-link.current {
+    border-left-color: transparent;
+    border-bottom-color: var(--rail-accent);
+  }
+  .rail-foot {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .rail-toggles,
+  .rail-user {
+    margin-bottom: 0;
+  }
+  .workspace {
+    padding: 1.3rem 1.1rem 2.5rem;
+  }
+  .figure.lead {
+    grid-column: span 1;
+  }
   .grid {
     display: block;
     overflow-x: auto;

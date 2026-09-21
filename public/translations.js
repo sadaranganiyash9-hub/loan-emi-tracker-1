@@ -18,6 +18,7 @@ var TRANSLATIONS = {
     logOut: "Log out",
     sessionExpired: "Your session has ended — please log in again.",
 
+    railManage: "Manage",
     dashboard: "Dashboard",
     members: "Members",
     loans: "Loans",
@@ -27,6 +28,8 @@ var TRANSLATIONS = {
     activeLoans: "Active loans",
     closedLoans: "Closed loans",
     totalOutstandingCard: "Total outstanding",
+    repaidOfLent: "of {total} lent has been repaid",
+    noLoansYetFoot: "No loans created yet.",
 
     addMember: "Add a member",
     name: "Name",
@@ -67,8 +70,12 @@ var TRANSLATIONS = {
     totalInterest: "Total interest",
     outstandingPrincipal: "Outstanding principal",
     repaid: "Repaid",
+    repaidOfPrincipal: "of the principal repaid",
     forecloseLoan: "Foreclose this loan",
     emiSchedule: "EMI schedule",
+    split: "Split",
+    scheduleNote:
+      "Each bar shows how that instalment splits. Interest shrinks every month because it is charged only on the balance still owed.",
     emiNo: "EMI #",
     dueDate: "Due date",
     emiAmount: "EMI amount",
@@ -78,7 +85,6 @@ var TRANSLATIONS = {
     foreclosedOn: "Foreclosed on {date}, settled for {amount}.",
     forecloseConfirm:
       "Foreclose this loan now?\n\nSettlement = outstanding principal ({amount}) plus this month's interest only. All remaining future interest is waived.",
-    perMonth: "/ month",
 
     memberWiseOutstanding: "Member-wise outstanding",
     exportCsv: "Export to CSV",
@@ -97,6 +103,7 @@ var TRANSLATIONS = {
     logOut: "लॉग आउट",
     sessionExpired: "आपका सत्र समाप्त हो गया — कृपया दोबारा लॉग इन करें।",
 
+    railManage: "प्रबंधन",
     dashboard: "डैशबोर्ड",
     members: "सदस्य",
     loans: "ऋण",
@@ -106,6 +113,8 @@ var TRANSLATIONS = {
     activeLoans: "सक्रिय ऋण",
     closedLoans: "बंद ऋण",
     totalOutstandingCard: "कुल बकाया",
+    repaidOfLent: "कुल {total} के ऋण में से चुकाया गया",
+    noLoansYetFoot: "अभी कोई ऋण नहीं बनाया गया।",
 
     addMember: "सदस्य जोड़ें",
     name: "नाम",
@@ -144,8 +153,12 @@ var TRANSLATIONS = {
     totalInterest: "कुल ब्याज",
     outstandingPrincipal: "बकाया मूलधन",
     repaid: "चुकाया गया",
+    repaidOfPrincipal: "मूलधन चुकाया गया",
     forecloseLoan: "यह ऋण फ़ोरक्लोज़ करें",
     emiSchedule: "ईएमआई अनुसूची",
+    split: "विभाजन",
+    scheduleNote:
+      "प्रत्येक बार दिखाता है कि वह किस्त कैसे बँटती है। ब्याज हर महीने घटता है क्योंकि वह केवल बची हुई शेष राशि पर लगता है।",
     emiNo: "ईएमआई #",
     dueDate: "देय तिथि",
     emiAmount: "ईएमआई राशि",
@@ -155,7 +168,6 @@ var TRANSLATIONS = {
     foreclosedOn: "{date} को फ़ोरक्लोज़ किया गया, {amount} में निपटाया गया।",
     forecloseConfirm:
       "अभी यह ऋण फ़ोरक्लोज़ करें?\n\nनिपटान = बकाया मूलधन ({amount}) और केवल इस महीने का ब्याज। शेष भविष्य का पूरा ब्याज माफ़ है।",
-    perMonth: "/ माह",
 
     memberWiseOutstanding: "सदस्य-वार बकाया",
     exportCsv: "सीएसवी में निर्यात करें",

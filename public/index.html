@@ -8,83 +8,121 @@
 </head>
 <body>
 
-<!-- ==================== LOGIN ==================== -->
+<!-- ============================ LOGIN ============================ -->
 <div id="login-screen">
   <form id="login-form" class="login-box">
+    <div class="login-mark">₹</div>
     <h1>Loan EMI Tracker</h1>
-    <p class="muted" data-t="staffLogin">Staff login</p>
+    <p class="sub" data-t="staffLogin">Staff login</p>
 
     <label>
-      <span data-t="username">Username</span>
+      <span class="micro" data-t="username">Username</span>
       <input type="text" id="login-username" value="admin" autocomplete="username" required />
     </label>
     <label>
-      <span data-t="password">Password</span>
+      <span class="micro" data-t="password">Password</span>
       <input type="password" id="login-password" value="admin123" autocomplete="current-password" required />
     </label>
 
     <p id="login-error" class="error-text"></p>
-    <button type="submit" data-t="logIn">Log in</button>
+    <button type="submit" class="primary wide" data-t="logIn">Log in</button>
     <p class="hint" data-t="loginHint">Test credentials are filled in already.</p>
   </form>
 </div>
 
-<!-- ==================== APP ==================== -->
+<!-- ============================= APP ============================= -->
 <div id="app-screen" class="hidden">
 
-  <header class="topbar">
-    <span class="brand">Loan EMI Tracker</span>
+  <!-- ---------------- left rail ---------------- -->
+  <aside class="rail">
+    <div class="rail-brand">
+      <span class="rail-mark">₹</span>
+      <span class="rail-name">Loan EMI<br /><em>Tracker</em></span>
+    </div>
 
-    <nav class="nav">
-      <button class="nav-link" data-goto="dashboard" data-t="dashboard">Dashboard</button>
-      <button class="nav-link" data-goto="members" data-t="members">Members</button>
-      <button class="nav-link" data-goto="loans" data-t="loans">Loans</button>
-      <button class="nav-link" data-goto="report" data-t="report">Report</button>
+    <nav class="rail-nav">
+      <span class="rail-heading" data-t="railManage">Manage</span>
+
+      <button class="rail-link" data-goto="dashboard">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
+        <span data-t="dashboard">Dashboard</span>
+      </button>
+
+      <button class="rail-link" data-goto="members">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2c0-3.6 3.2-6.2 7.2-6.2s7.2 2.6 7.2 6.2"/></svg>
+        <span data-t="members">Members</span>
+      </button>
+
+      <button class="rail-link" data-goto="loans">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></svg>
+        <span data-t="loans">Loans</span>
+      </button>
+
+      <button class="rail-link" data-goto="report">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5h17"/><rect x="5.5" y="11" width="3.6" height="6.2" rx="1"/><rect x="11.2" y="6.5" width="3.6" height="10.7" rx="1"/><rect x="16.9" y="13.5" width="3.6" height="3.7" rx="1"/></svg>
+        <span data-t="report">Report</span>
+      </button>
     </nav>
 
-    <div class="topbar-right">
-      <button type="button" id="language-btn" class="small-btn" title="Switch language">EN / हिं</button>
-      <button type="button" id="theme-btn" class="small-btn" title="Switch theme">🌙</button>
-      <span id="signed-in-as" class="muted small"></span>
-      <button type="button" id="logout-btn" class="text-btn" data-t="logOut">Log out</button>
+    <div class="rail-foot">
+      <div class="rail-toggles">
+        <button type="button" id="language-btn" class="chip">EN / हिं</button>
+        <button type="button" id="theme-btn" class="chip"></button>
+      </div>
+      <div class="rail-user">
+        <span class="rail-avatar" id="rail-avatar"></span>
+        <span class="rail-user-name" id="signed-in-as"></span>
+        <button type="button" id="logout-btn" class="rail-out" data-t="logOut">Log out</button>
+      </div>
     </div>
-  </header>
+  </aside>
 
-  <main class="content">
+  <!-- ---------------- workspace ---------------- -->
+  <div class="workspace">
 
-    <!-- ---------- Dashboard ---------- -->
+    <!-- ========== Dashboard ========== -->
     <section id="view-dashboard" class="view">
-      <h1 data-t="dashboard">Dashboard</h1>
-      <div id="dashboard-cards" class="cards"></div>
+      <header class="page-head">
+        <div>
+          <span class="micro" data-t="railManage">Manage</span>
+          <h1 data-t="dashboard">Dashboard</h1>
+        </div>
+      </header>
+      <div id="dashboard-cards"></div>
     </section>
 
-    <!-- ---------- Members ---------- -->
+    <!-- ========== Members ========== -->
     <section id="view-members" class="view hidden">
-      <h1 data-t="members">Members</h1>
+      <header class="page-head">
+        <div>
+          <span class="micro" data-t="railManage">Manage</span>
+          <h1 data-t="members">Members</h1>
+        </div>
+      </header>
 
       <div class="panel">
         <h2 data-t="addMember">Add a member</h2>
         <form id="member-form" class="row-form">
           <label>
-            <span data-t="name">Name</span>
+            <span class="micro" data-t="name">Name</span>
             <input type="text" id="new-member-name" required />
           </label>
           <label>
-            <span data-t="employeeId">Employee / member ID</span>
+            <span class="micro" data-t="employeeId">Employee / member ID</span>
             <input type="text" id="new-member-emp-id" required />
           </label>
           <label>
-            <span data-t="salaryInput">Monthly salary (₹)</span>
+            <span class="micro" data-t="salaryInput">Monthly salary (₹)</span>
             <input type="number" id="new-member-salary" min="1" step="1" required />
           </label>
-          <button type="submit" data-t="addMember">Add a member</button>
+          <button type="submit" class="primary" data-t="addMember">Add a member</button>
         </form>
         <p id="member-error" class="error-text"></p>
       </div>
 
       <div class="panel">
         <div class="panel-head">
-          <h2><span data-t="allMembers">All members</span> <span id="member-count" class="muted small"></span></h2>
+          <h2><span data-t="allMembers">All members</span> <span id="member-count" class="tally"></span></h2>
           <input type="search" id="member-search" class="search" data-t-placeholder="searchMembers" />
         </div>
         <table class="grid">
@@ -92,105 +130,130 @@
             <tr>
               <th data-t="name">Name</th>
               <th data-t="employeeId">Employee ID</th>
-              <th data-t="monthlySalary">Monthly salary</th>
-              <th data-t="activeLoans">Active loans</th>
+              <th class="num" data-t="monthlySalary">Monthly salary</th>
+              <th class="num" data-t="activeLoans">Active loans</th>
             </tr>
           </thead>
           <tbody id="member-rows"></tbody>
         </table>
-        <p id="member-empty" class="muted hidden"></p>
+        <p id="member-empty" class="empty hidden"></p>
       </div>
     </section>
 
-    <!-- ---------- Loans ---------- -->
+    <!-- ========== Loans ========== -->
     <section id="view-loans" class="view hidden">
-      <h1 data-t="loans">Loans</h1>
+      <header class="page-head">
+        <div>
+          <span class="micro" data-t="railManage">Manage</span>
+          <h1 data-t="loans">Loans</h1>
+        </div>
+      </header>
 
       <div class="panel">
         <h2 data-t="createLoan">Create a loan</h2>
-        <p id="loans-need-member" class="muted hidden" data-t="needMemberFirst">Add a member before creating a loan.</p>
+        <p id="loans-need-member" class="empty hidden" data-t="needMemberFirst">Add a member before creating a loan.</p>
         <form id="loan-form" class="row-form hidden">
           <label>
-            <span data-t="member">Member</span>
+            <span class="micro" data-t="member">Member</span>
             <select id="new-loan-member" required></select>
           </label>
           <label>
-            <span data-t="principalInput">Principal (₹)</span>
+            <span class="micro" data-t="principalInput">Principal (₹)</span>
             <input type="number" id="new-loan-principal" min="1" step="1" required />
           </label>
           <label>
-            <span data-t="tenureMonths">Tenure (months)</span>
+            <span class="micro" data-t="tenureMonths">Tenure (months)</span>
             <input type="number" id="new-loan-tenure" min="1" step="1" required />
           </label>
           <label>
-            <span data-t="startDate">Start date</span>
+            <span class="micro" data-t="startDate">Start date</span>
             <input type="date" id="new-loan-start" required />
           </label>
-          <label class="readonly-field">
-            <span data-t="interestRate">Interest rate</span>
-            <span data-t="fixedRate">8% p.a., reducing balance</span>
-          </label>
-          <button type="submit" data-t="createLoan">Create a loan</button>
+          <span class="rate-stamp">
+            <span class="micro" data-t="interestRate">Interest rate</span>
+            <b data-t="fixedRate">8% p.a., reducing balance</b>
+          </span>
+          <button type="submit" class="primary" data-t="createLoan">Create a loan</button>
         </form>
         <p id="loan-error" class="error-text"></p>
       </div>
 
       <div class="panel">
         <div class="panel-head">
-          <h2><span data-t="allLoans">All loans</span> <span id="loan-count" class="muted small"></span></h2>
+          <h2><span data-t="allLoans">All loans</span> <span id="loan-count" class="tally"></span></h2>
           <input type="search" id="loan-search" class="search" data-t-placeholder="searchLoans" />
         </div>
-        <table class="grid">
+        <table class="grid loans-grid">
           <thead>
             <tr>
               <th data-t="member">Member</th>
-              <th data-t="principal">Principal</th>
-              <th data-t="tenure">Tenure</th>
-              <th data-t="emi">EMI</th>
-              <th data-t="outstanding">Outstanding</th>
+              <th class="num" data-t="principal">Principal</th>
+              <th class="num" data-t="tenure">Tenure</th>
+              <th class="num" data-t="emi">EMI</th>
+              <th class="num" data-t="outstanding">Outstanding</th>
+              <th data-t="repaid">Repaid</th>
               <th data-t="status">Status</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="loan-rows"></tbody>
         </table>
-        <p id="loan-empty" class="muted hidden"></p>
+        <p id="loan-empty" class="empty hidden"></p>
       </div>
     </section>
 
-    <!-- ---------- Loan detail ---------- -->
+    <!-- ========== Loan detail ========== -->
     <section id="view-loan" class="view hidden">
-      <button type="button" id="back-to-loans" class="text-btn back" data-t="backToLoans">← Back to loans</button>
-      <h1 id="loan-title"></h1>
-
-      <div class="panel">
-        <div class="summary">
-          <div><span class="cap" data-t="principal">Principal</span><b id="sum-principal"></b></div>
-          <div><span class="cap" data-t="tenure">Tenure</span><b id="sum-tenure"></b></div>
-          <div><span class="cap" data-t="interestRate">Interest rate</span><b id="sum-rate"></b></div>
-          <div><span class="cap" data-t="emi">EMI</span><b id="sum-emi"></b></div>
-          <div><span class="cap" data-t="totalInterest">Total interest</span><b id="sum-interest"></b></div>
-          <div><span class="cap" data-t="outstandingPrincipal">Outstanding principal</span><b id="sum-outstanding" class="accent"></b></div>
-          <div><span class="cap" data-t="repaid">Repaid</span><b id="sum-repaid"></b></div>
-          <div><span class="cap" data-t="status">Status</span><b id="sum-status"></b></div>
+      <header class="page-head">
+        <div>
+          <button type="button" id="back-to-loans" class="crumb" data-t="backToLoans">← Back to loans</button>
+          <h1 id="loan-title"></h1>
         </div>
+        <button type="button" id="foreclose-btn" class="danger hidden" data-t="forecloseLoan">Foreclose this loan</button>
+      </header>
 
-        <p id="foreclosed-note" class="note hidden"></p>
-        <button type="button" id="foreclose-btn" class="danger-btn hidden" data-t="forecloseLoan">Foreclose this loan</button>
-        <p id="foreclose-error" class="error-text"></p>
+      <p id="foreclosed-note" class="banner hidden"></p>
+      <p id="foreclose-error" class="error-text"></p>
+
+      <div class="figures">
+        <div class="figure lead">
+          <span class="micro" data-t="outstandingPrincipal">Outstanding principal</span>
+          <b id="sum-outstanding" class="hero"></b>
+          <div class="meter" id="repaid-meter">
+            <span id="repaid-meter-fill"></span>
+          </div>
+          <span class="figure-foot"><b id="sum-repaid"></b> <span data-t="repaidOfPrincipal">of the principal repaid</span></span>
+        </div>
+        <div class="figure"><span class="micro" data-t="principal">Principal</span><b id="sum-principal"></b></div>
+        <div class="figure"><span class="micro" data-t="emi">EMI</span><b id="sum-emi"></b></div>
+        <div class="figure"><span class="micro" data-t="tenure">Tenure</span><b id="sum-tenure"></b></div>
+        <div class="figure"><span class="micro" data-t="interestRate">Interest rate</span><b id="sum-rate"></b></div>
+        <div class="figure"><span class="micro" data-t="totalInterest">Total interest</span><b id="sum-interest"></b></div>
+        <div class="figure"><span class="micro" data-t="status">Status</span><b id="sum-status"></b></div>
       </div>
 
       <div class="panel">
-        <h2 data-t="emiSchedule">EMI schedule</h2>
-        <table class="grid">
+        <div class="panel-head">
+          <h2 data-t="emiSchedule">EMI schedule</h2>
+          <div class="legend">
+            <span class="legend-item"><i class="swatch principal"></i><span data-t="principalPart">Principal</span></span>
+            <span class="legend-item"><i class="swatch interest"></i><span data-t="interestPart">Interest</span></span>
+          </div>
+        </div>
+        <p class="panel-note" data-t="scheduleNote">
+          Each bar shows how that instalment splits. Interest shrinks every month because it is charged only on
+          the balance still owed.
+        </p>
+        <table class="grid schedule-grid">
           <thead>
             <tr>
-              <th data-t="emiNo">EMI #</th>
+              <th class="num" data-t="emiNo">EMI #</th>
               <th data-t="dueDate">Due date</th>
-              <th data-t="emiAmount">EMI amount</th>
-              <th data-t="principalPart">Principal</th>
-              <th data-t="interestPart">Interest</th>
-              <th data-t="balanceAfter">Balance after</th>
+              <th class="num" data-t="emiAmount">EMI amount</th>
+              <th class="num" data-t="principalPart">Principal</th>
+              <th class="num" data-t="interestPart">Interest</th>
+              <th data-t="split">Split</th>
+              <th class="num" data-t="balanceAfter">Balance after</th>
             </tr>
           </thead>
           <tbody id="schedule-rows"></tbody>
@@ -198,37 +261,40 @@
       </div>
     </section>
 
-    <!-- ---------- Report ---------- -->
+    <!-- ========== Report ========== -->
     <section id="view-report" class="view hidden">
-      <h1 data-t="memberWiseOutstanding">Member-wise outstanding</h1>
+      <header class="page-head">
+        <div>
+          <span class="micro" data-t="report">Report</span>
+          <h1 data-t="memberWiseOutstanding">Member-wise outstanding</h1>
+        </div>
+        <button type="button" id="export-csv-btn" class="primary" data-t="exportCsv">Export to CSV</button>
+      </header>
+      <p id="export-error" class="error-text"></p>
 
       <div class="panel">
-        <div class="panel-head">
-          <button type="button" id="export-csv-btn" data-t="exportCsv">Export to CSV</button>
-          <p id="export-error" class="error-text"></p>
-        </div>
         <table class="grid">
           <thead>
             <tr>
               <th data-t="member">Member</th>
               <th data-t="employeeId">Employee ID</th>
-              <th data-t="loanCount">Loans</th>
-              <th data-t="totalOutstanding">Total outstanding</th>
+              <th class="num" data-t="loanCount">Loans</th>
+              <th class="num" data-t="totalOutstanding">Total outstanding</th>
             </tr>
           </thead>
           <tbody id="report-rows"></tbody>
           <tfoot>
             <tr>
               <td colspan="3"><b data-t="total">Total</b></td>
-              <td><b id="report-total"></b></td>
+              <td class="num"><b id="report-total"></b></td>
             </tr>
           </tfoot>
         </table>
-        <p id="report-empty" class="muted hidden"></p>
+        <p id="report-empty" class="empty hidden"></p>
       </div>
     </section>
 
-  </main>
+  </div>
 </div>
 
 <script src="translations.js"></script>
