@@ -1,33 +1,3 @@
-function currentLanguage() {
-  return localStorage.getItem("language") === "hi" ? "hi" : "en";
-}
-
-function t(key, values) {
-  var dictionary = TRANSLATIONS[currentLanguage()];
-  var text = dictionary[key] || TRANSLATIONS.en[key] || key;
-
-  if (values) {
-    for (var name in values) {
-      text = text.replace("{" + name + "}", values[name]);
-    }
-  }
-  return text;
-}
-
-function applyLanguage() {
-  var labels = document.querySelectorAll("[data-t]");
-  for (var i = 0; i < labels.length; i++) {
-    labels[i].textContent = t(labels[i].getAttribute("data-t"));
-  }
-
-  var placeholders = document.querySelectorAll("[data-t-placeholder]");
-  for (var j = 0; j < placeholders.length; j++) {
-    placeholders[j].placeholder = t(placeholders[j].getAttribute("data-t-placeholder"));
-  }
-
-  document.documentElement.lang = currentLanguage();
-}
-
 function applyTheme() {
   var dark = localStorage.getItem("theme") === "dark";
   document.body.classList.toggle("dark", dark);
@@ -62,7 +32,7 @@ function escapeHtml(value) {
 }
 
 function statusPill(status) {
-  var label = status === "Active" ? t("active") : t("closed");
+  var label = status === "Active" ? "Active" : "Closed";
   return '<span class="pill ' + status.toLowerCase() + '">' + escapeHtml(label) + "</span>";
 }
 
@@ -73,7 +43,7 @@ function splitBar(principalPart, interestPart) {
   var principalPercent = (principalPart / total) * 100;
   var interestPercent = 100 - principalPercent;
 
-  var tip = t("principalPart") + " " + money(principalPart) + "  ·  " + t("interestPart") + " " + money(interestPart);
+  var tip = "Principal" + " " + money(principalPart) + "  ·  " + "Interest" + " " + money(interestPart);
 
   return (
     '<span class="split" title="' +
@@ -85,22 +55,6 @@ function splitBar(principalPart, interestPart) {
     '<i class="interest" style="width:' +
     interestPercent.toFixed(2) +
     '%"></i>' +
-    "</span>"
-  );
-}
-
-function miniMeter(percent) {
-  var clamped = Math.max(0, Math.min(100, percent));
-  return (
-    '<span class="mini-meter" title="' +
-    escapeHtml(clamped.toFixed(1) + "% " + t("repaid")) +
-    '">' +
-    '<span class="track"><i style="width:' +
-    clamped.toFixed(2) +
-    '%"></i></span>' +
-    "<span>" +
-    clamped.toFixed(0) +
-    "%</span>" +
     "</span>"
   );
 }
@@ -123,7 +77,7 @@ async function callApi(url, options) {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     showLoginScreen();
-    throw new Error(t("sessionExpired"));
+    throw new Error("Your session has ended — please log in again.");
   }
 
   if (!response.ok) {
@@ -210,7 +164,7 @@ function setError(elementId, message) {
 
 async function renderDashboard() {
   var box = document.getElementById("dashboard-cards");
-  box.innerHTML = '<p class="empty">' + t("loading") + "</p>";
+  box.innerHTML = '<p class="empty">' + "Loading…" + "</p>";
 
   var results = await Promise.all([api.getMembers(), api.getLoans()]);
   var members = results[0];
@@ -232,7 +186,7 @@ async function renderDashboard() {
   var lead =
     '<div class="figure lead">' +
     '<span class="micro">' +
-    escapeHtml(t("totalOutstandingCard")) +
+    escapeHtml("Total outstanding") +
     "</span>" +
     '<b class="hero">' +
     escapeHtml(money(outstanding)) +
@@ -242,17 +196,17 @@ async function renderDashboard() {
         '<span class="figure-foot"><b>' +
         repaidPercent.toFixed(1) +
         "%</b> " +
-        escapeHtml(t("repaidOfLent", { total: money(lent) })) +
+        escapeHtml("of " + money(lent) + " lent has been repaid") +
         "</span>"
-      : '<span class="figure-foot">' + escapeHtml(t("noLoansYetFoot")) + "</span>") +
+      : '<span class="figure-foot">' + escapeHtml("No loans created yet.") + "</span>") +
     "</div>";
 
   box.className = "figures";
   box.innerHTML =
     lead +
-    figure(members.length, t("totalMembers")) +
-    figure(active.length, t("activeLoans")) +
-    figure(loans.length - active.length, t("closedLoans"));
+    figure(members.length, "Members") +
+    figure(active.length, "Active loans") +
+    figure(loans.length - active.length, "Closed loans");
 }
 
 function figure(value, label) {
@@ -292,7 +246,7 @@ async function renderMembers(search) {
   document.getElementById("member-count").textContent = "(" + members.length + ")";
 
   var empty = document.getElementById("member-empty");
-  empty.textContent = search ? t("noMembersMatch") : t("noMembers");
+  empty.textContent = search ? "No members match that search." : "No members yet — add one above.";
   empty.classList.toggle("hidden", members.length > 0);
 }
 
@@ -307,11 +261,11 @@ async function submitMember(event) {
   };
 
   if (member.name === "" || member.employeeId === "") {
-    setError("member-error", t("name") + " / " + t("employeeId") + " — required");
+    setError("member-error", "Name" + " / " + "Employee / member ID" + " — required");
     return;
   }
   if (!(member.monthlySalary > 0)) {
-    setError("member-error", t("monthlySalary") + " — must be a positive number");
+    setError("member-error", "Monthly salary" + " — must be a positive number");
     return;
   }
 
@@ -369,19 +323,17 @@ async function renderLoans(search) {
         '</td><td class="num">' +
         loan.tenureMonths +
         " " +
-        t("months") +
+        "months" +
         '</td><td class="num">' +
         money(loan.emiAmount) +
         '</td><td class="num">' +
         money(loan.outstandingBalance) +
         "</td><td>" +
-        miniMeter(loan.percentRepaid) +
-        "</td><td>" +
         statusPill(loan.status) +
         '</td><td><button type="button" class="link open-loan" data-loan="' +
         loan.id +
         '">' +
-        t("viewSchedule") +
+        "View schedule →" +
         "</button></td></tr>"
       );
     })
@@ -390,7 +342,7 @@ async function renderLoans(search) {
   document.getElementById("loan-count").textContent = "(" + loans.length + ")";
 
   var empty = document.getElementById("loan-empty");
-  empty.textContent = search ? t("noLoansMatch") : t("noLoans");
+  empty.textContent = search ? "No loans match that search." : "No loans yet.";
   empty.classList.toggle("hidden", loans.length > 0);
 
   var openButtons = document.querySelectorAll(".open-loan");
@@ -414,11 +366,11 @@ async function submitLoan(event) {
   };
 
   if (!(loan.principal > 0)) {
-    setError("loan-error", t("principal") + " — must be a positive number");
+    setError("loan-error", "Principal" + " — must be a positive number");
     return;
   }
   if (!Number.isInteger(loan.tenureMonths) || loan.tenureMonths <= 0) {
-    setError("loan-error", t("tenureMonths") + " — must be a whole number above 0");
+    setError("loan-error", "Tenure (months)" + " — must be a whole number above 0");
     return;
   }
 
@@ -444,10 +396,10 @@ async function renderLoanDetail(loanId) {
     return;
   }
 
-  document.getElementById("loan-title").textContent = t("loanFor", { name: loan.memberName });
+  document.getElementById("loan-title").textContent = "Loan for " + loan.memberName;
 
   document.getElementById("sum-principal").textContent = money(loan.principal);
-  document.getElementById("sum-tenure").textContent = loan.tenureMonths + " " + t("months");
+  document.getElementById("sum-tenure").textContent = loan.tenureMonths + " " + "months";
   document.getElementById("sum-rate").textContent = loan.annualRatePercent + "% p.a.";
   document.getElementById("sum-emi").textContent = money(loan.emiAmount);
   document.getElementById("sum-interest").textContent = money(loan.totalInterest);
@@ -457,16 +409,13 @@ async function renderLoanDetail(loanId) {
 
   var meterFill = document.getElementById("repaid-meter-fill");
   meterFill.style.width = Math.max(0, Math.min(100, loan.percentRepaid)).toFixed(2) + "%";
-  document.getElementById("repaid-meter").title = loan.percentRepaid.toFixed(1) + "% " + t("repaid");
+  document.getElementById("repaid-meter").title = loan.percentRepaid.toFixed(1) + "% " + "Repaid";
 
   var note = document.getElementById("foreclosed-note");
   var button = document.getElementById("foreclose-btn");
 
   if (loan.foreclosed) {
-    note.textContent = t("foreclosedOn", {
-      date: prettyDate(loan.foreclosedAt),
-      amount: money(loan.foreclosureAmount),
-    });
+    note.textContent = "Foreclosed on " + prettyDate(loan.foreclosedAt) + ", settled for " + money(loan.foreclosureAmount) + ".";
     note.classList.remove("hidden");
     button.classList.add("hidden");
   } else {
@@ -501,7 +450,9 @@ async function renderLoanDetail(loanId) {
 }
 
 async function foreclose(loan) {
-  var confirmed = confirm(t("forecloseConfirm", { amount: money(loan.outstandingBalance) }));
+  var confirmed = confirm("Foreclose this loan now?\n\nSettlement = outstanding principal (" +
+      money(loan.outstandingBalance) +
+      ") plus this month's interest only. All remaining future interest is waived.");
   if (!confirmed) return;
 
   try {
@@ -536,7 +487,7 @@ async function renderReport() {
   document.getElementById("report-total").textContent = money(total);
 
   var empty = document.getElementById("report-empty");
-  empty.textContent = t("noMembers");
+  empty.textContent = "No members yet — add one above.";
   empty.classList.toggle("hidden", rows.length > 0);
 }
 
@@ -600,7 +551,6 @@ function debounce(fn, waitMs) {
 
 document.addEventListener("DOMContentLoaded", function () {
   applyTheme();
-  applyLanguage();
 
   document.getElementById("login-form").addEventListener("submit", submitLogin);
   document.getElementById("logout-btn").addEventListener("click", logOut);
@@ -614,14 +564,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("theme-btn").addEventListener("click", function () {
     localStorage.setItem("theme", localStorage.getItem("theme") === "dark" ? "light" : "dark");
     applyTheme();
-  });
-
-  document.getElementById("language-btn").addEventListener("click", function () {
-    localStorage.setItem("language", currentLanguage() === "en" ? "hi" : "en");
-    applyLanguage();
-
-    var openView = document.querySelector(".view:not(.hidden)");
-    if (openView) goTo(openView.id.replace("view-", ""));
   });
 
   var railLinks = document.querySelectorAll("[data-goto]");

@@ -307,16 +307,13 @@ select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-col
 .rail-link.current svg { color: var(--rail-accent); opacity: 1; }
 
 .rail-foot { border-top: 1px solid var(--rail-line); padding-top: 0.9rem; margin-top: 0.9rem; }
-.rail-toggles { display: flex; gap: 0.4rem; margin-bottom: 0.9rem; }
 .chip {
-  flex: 1;
+  margin-bottom: 0.9rem;
   border: 1px solid var(--rail-line);
   border-radius: var(--radius);
-  padding: 0.32rem 0.4rem;
-  font-size: 0.75rem;
-  font-weight: 500;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
   color: var(--rail-ink);
-  text-align: center;
 }
 .chip:hover { background: #1f1f29; color: var(--rail-ink-strong); }
 
@@ -522,27 +519,6 @@ select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-col
 }
 .swatch.principal { background: var(--series-principal); }
 .swatch.interest { background: var(--series-interest); }
-
-.mini-meter {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  white-space: nowrap;
-}
-.mini-meter .track {
-  width: 3rem;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--meter-track);
-  overflow: hidden;
-}
-.mini-meter .track i {
-  display: block;
-  height: 100%;
-  border-radius: 3px;
-  background: var(--series-principal);
-}
-.mini-meter span { font-size: 0.78rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
 /* ========================= narrow screens ========================= */
 

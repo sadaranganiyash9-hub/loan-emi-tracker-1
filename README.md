@@ -45,7 +45,7 @@ server/loanView.js    works out schedule / outstanding / status for a loan
 server/db.js          reads and writes data/db.json
 server/auth.js        mock login
 server/server.js      the API routes
-public/               index.html, app.js, translations.js, style.css
+public/               index.html, app.js, style.css
 ```
 
 I kept the maths in its own file so it could be tested separately from the rest
@@ -102,8 +102,8 @@ the final instalment is ₹8,697 rather than ₹8,699. There's a test for it.
 
 **Edit this to match what you actually did before submitting.**
 
-I used AI (Claude) heavily on this. The Express routes, the frontend, the
-styling and the Hindi translations were written with it. The EMI maths was too,
+I used AI (Claude) heavily on this. The Express routes, the frontend and the
+styling were written with it. The EMI maths was too,
 but I checked the reference case by hand (₹1,00,000 / 8% / 12 months → ₹8,699,
 month 1 interest ₹667, final balance ₹0) against the formula and an online EMI
 calculator before building anything on top of it. I tested the whole flow
@@ -112,10 +112,12 @@ foreclosure, the report and the CSV export — plus the edge cases above.
 
 ## Done
 
-All the core requirements, plus every bonus: foreclosure, top-up gating,
-search on both lists, dark mode, EMI tests (37 checks), and an English/Hindi
-toggle. Each schedule row also has a small bar showing how that instalment
-splits, which makes the shrinking interest easier to see than numbers alone.
+All the core requirements, plus these bonuses: foreclosure, top-up gating,
+search on both lists, dark mode, and EMI tests (37 checks). Each schedule row
+also has a small bar showing how that instalment splits, which makes the
+shrinking interest easier to see than the numbers alone.
+
+I skipped the multi-language toggle.
 
 ## What I'd improve with more time
 
