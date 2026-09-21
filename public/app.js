@@ -1,23 +1,15 @@
-// app.js
-// ----------------------------------------------------------------------
-// The frontend. Plain JavaScript and the browser's own DOM API -- no
-// framework and no build step, so what's in this file is exactly what
-// runs.
-//
-// It's organised top to bottom as: small helpers, then the API calls,
-// then one render function per screen, then the event wiring at the
-// bottom.
-// ----------------------------------------------------------------------
+// app.js - all the frontend logic: calling the API, remembering
+// login/theme/language in localStorage, and rendering each screen.
 
 // ======================================================================
-// Language + theme (both bonus features), remembered in localStorage
+// Language and theme
 // ======================================================================
 
 function currentLanguage() {
   return localStorage.getItem("language") === "hi" ? "hi" : "en";
 }
 
-/** Look up a label. {placeholders} in the text get replaced from values. */
+// looks up a label; {placeholders} get replaced from values
 function t(key, values) {
   var dictionary = TRANSLATIONS[currentLanguage()];
   var text = dictionary[key] || TRANSLATIONS.en[key] || key;
@@ -30,12 +22,8 @@ function t(key, values) {
   return text;
 }
 
-/**
- * Fills in every fixed label on the page. Elements carry the key they
- * need in a data-t attribute (or data-t-placeholder for inputs), which
- * keeps the wording out of the markup and means switching language is
- * just running this again.
- */
+// fills in every fixed label; elements carry their key in a data-t
+// attribute (or data-t-placeholder for inputs)
 function applyLanguage() {
   var labels = document.querySelectorAll("[data-t]");
   for (var i = 0; i < labels.length; i++) {
@@ -60,8 +48,7 @@ function applyTheme() {
 // Formatting
 // ======================================================================
 
-// Indian grouping (1,23,456 rather than 123,456) comes free from the
-// "en-IN" locale, so there's no need to hand-roll the digit grouping.
+// "en-IN" gives Indian grouping (1,23,456 not 123,456) for free.
 // Whole rupees only, as the spec asks.
 var rupeeFormat = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -81,10 +68,7 @@ function prettyDate(isoDate) {
   });
 }
 
-/**
- * Anything a user typed gets escaped before it goes into innerHTML.
- * Without this, a member named <img onerror=...> would run as markup.
- */
+// escape anything the user typed before it goes into innerHTML
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -99,15 +83,8 @@ function statusPill(status) {
   return '<span class="pill ' + status.toLowerCase() + '">' + escapeHtml(label) + "</span>";
 }
 
-/**
- * The little stacked bar in each schedule row, showing how that one
- * instalment divides between principal and interest.
- *
- * It's the same information as the two money columns beside it, drawn
- * so the trend down the column is visible at a glance: interest-heavy
- * at the top, almost all principal by the last row. The exact figures
- * stay in the table, so nothing depends on being able to see colour.
- */
+// the small stacked bar in each schedule row, showing how that
+// instalment divides between principal and interest
 function splitBar(principalPart, interestPart) {
   var total = principalPart + interestPart;
   if (total <= 0) return "";
@@ -131,7 +108,7 @@ function splitBar(principalPart, interestPart) {
   );
 }
 
-/** A small "x% repaid" bar for the loans list. */
+// small "x% repaid" bar for the loans list
 function miniMeter(percent) {
   var clamped = Math.max(0, Math.min(100, percent));
   return (
@@ -166,11 +143,9 @@ async function callApi(url, options) {
     body: options.body,
   });
 
-  // A 401 on any normal call means the saved token is no longer good,
-  // so clear it and go back to the login screen. The login call itself
-  // is excluded, because a 401 there just means the password was wrong
-  // and its own message ("Wrong username or password") is what should
-  // be shown.
+  // A 401 means the saved token is no good, so go back to the login
+  // screen. Not for the login call itself, where a 401 just means the
+  // password was wrong and its own message should show.
   if (response.status === 401 && url !== "/api/login") {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
@@ -247,8 +222,7 @@ function goTo(viewName) {
   }
   document.getElementById("view-" + viewName).classList.remove("hidden");
 
-  // The loan detail screen is reached from the loans list, so keep
-  // "Loans" marked as the current section while it's open.
+  // the loan detail screen keeps "Loans" highlighted
   var railSection = viewName === "loan" ? "loans" : viewName;
   var railLinks = document.querySelectorAll(".rail-link");
   for (var j = 0; j < railLinks.length; j++) {
@@ -262,7 +236,7 @@ function goTo(viewName) {
   if (viewName === "loan" && openLoanId) renderLoanDetail(openLoanId);
 }
 
-/** Puts an error message on screen, or clears it when given nothing. */
+// shows an error message, or clears it when given nothing
 function setError(elementId, message) {
   document.getElementById(elementId).textContent = message || "";
 }
@@ -290,13 +264,9 @@ async function renderDashboard() {
     outstanding += loans[i].outstandingBalance;
   }
 
-  // Share of everything ever lent that has now been repaid. Guarded
-  // against the no-loans case, where the percentage is meaningless.
+  // guard the no-loans case, where the percentage is meaningless
   var repaidPercent = lent > 0 ? ((lent - outstanding) / lent) * 100 : 0;
 
-  // One lead figure carries the headline number, with the total lent
-  // folded into its caption rather than taking a tile of its own. The
-  // rest are plain counts, so they stay small.
   var lead =
     '<div class="figure lead">' +
     '<span class="micro">' +
@@ -342,9 +312,7 @@ async function renderMembers(search) {
   var members = results[0];
   var allLoans = results[1];
 
-  // Show how many active loans each member has -- it saves cross
-  // referencing two screens, and it's the number that decides whether
-  // they can take another loan.
+  // active loan count per member
   var rows = members.map(function (member) {
     var activeCount = allLoans.filter(function (loan) {
       return loan.memberId === member.id && loan.status === "Active";
@@ -381,9 +349,7 @@ async function submitMember(event) {
     monthlySalary: Number(document.getElementById("new-member-salary").value),
   };
 
-  // Checked here as well as on the server. The server's check is the
-  // one that actually protects the data; this one just gives a faster
-  // answer without a round trip.
+  // checked on the server too; this is just a faster response
   if (member.name === "" || member.employeeId === "") {
     setError("member-error", t("name") + " / " + t("employeeId") + " — required");
     return;
@@ -475,7 +441,6 @@ async function renderLoans(search) {
   empty.textContent = search ? t("noLoansMatch") : t("noLoans");
   empty.classList.toggle("hidden", loans.length > 0);
 
-  // Wire up the per-row buttons that were just created.
   var openButtons = document.querySelectorAll(".open-loan");
   for (var i = 0; i < openButtons.length; i++) {
     openButtons[i].addEventListener("click", function (event) {
@@ -512,8 +477,7 @@ async function submitLoan(event) {
     document.getElementById("loan-search").value = "";
     await renderLoans();
   } catch (err) {
-    // This is also where the top-up rule surfaces: the server replies
-    // with an explanation of how much is still to be repaid.
+    // the top-up rule also surfaces here
     setError("loan-error", err.message);
   }
 }
@@ -560,8 +524,6 @@ async function renderLoanDetail(loanId) {
     button.classList.add("hidden");
   } else {
     note.classList.add("hidden");
-    // Only an active loan can be foreclosed -- a fully repaid one has
-    // nothing left to settle.
     button.classList.toggle("hidden", loan.status !== "Active");
     button.onclick = function () {
       foreclose(loan);
@@ -639,8 +601,8 @@ async function exportCsv() {
   setError("export-error", "");
 
   try {
-    // A plain link can't send the Authorization header, so fetch the
-    // file and hand the browser the downloaded blob instead.
+    // a plain link can't send the Authorization header, so fetch the
+    // file and hand the browser the blob
     var response = await fetch("/api/report/outstanding.csv", {
       headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     });
@@ -692,7 +654,7 @@ function logOut() {
 // Start up: wire everything once the page is ready
 // ======================================================================
 
-/** Waits until typing stops before searching, instead of firing per key. */
+// waits until typing stops before searching
 function debounce(fn, waitMs) {
   var timer;
   return function () {
@@ -726,16 +688,13 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.setItem("language", currentLanguage() === "en" ? "hi" : "en");
     applyLanguage();
 
-    // Re-render the screen that's open so the text built in JavaScript
-    // (table rows, badges, counts) switches language too, not just the
-    // fixed labels handled by applyLanguage().
+    // re-render the open screen so text built in JS switches too
     var openView = document.querySelector(".view:not(.hidden)");
     if (openView) goTo(openView.id.replace("view-", ""));
   });
 
-  // currentTarget, not target: these buttons contain an icon and a
-  // label, so a click usually lands on a child element rather than on
-  // the button that carries the data-goto attribute.
+  // currentTarget, not target - the click lands on the icon or label
+  // inside the button, not the button itself
   var railLinks = document.querySelectorAll("[data-goto]");
   for (var i = 0; i < railLinks.length; i++) {
     railLinks[i].addEventListener("click", function (event) {
@@ -757,7 +716,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 200)
   );
 
-  // Already logged in from a previous visit? Skip the login screen.
+  // already logged in from a previous visit
   if (localStorage.getItem("token")) {
     showAppScreen();
   } else {

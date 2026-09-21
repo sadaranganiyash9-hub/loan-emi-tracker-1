@@ -1,19 +1,8 @@
-/* style.css
-   ======================================================================
-   Layout is a fixed dark rail on the left with the workspace beside it.
-   The rail stays dark in both themes on purpose — it's the one constant
-   the app is recognisable by.
-
-   Colours are declared once as variables. body.dark redefines the same
-   variables, so there is a single set of layout rules rather than two.
-
-   The two series colours (principal / interest, used by the schedule
-   bars) were checked for colour-blind separation and contrast against
-   these exact surfaces rather than picked by eye.
-   ====================================================================== */
+/* style.css - colours are variables at the top; body.dark redefines
+   the same ones, so there's a single set of layout rules. */
 
 :root {
-  /* the rail is dark in both themes, so it carries its own tokens */
+  /* the rail stays dark in both themes, so it has its own colours */
   --rail: #17171f;
   --rail-line: #26262f;
   --rail-ink: #a9a9b8;
@@ -93,8 +82,7 @@ body {
   display: none !important;
 }
 
-/* Uppercase micro-label — used for every field label, column heading
-   and figure caption, which is most of what gives the app its look. */
+/* small uppercase label, used for field labels and column headings */
 .micro {
   display: block;
   font-size: 0.66rem;
@@ -117,7 +105,7 @@ h2 {
   margin: 0 0 1rem;
 }
 
-/* Money and other figures line up in columns. */
+/* figures line up in columns */
 .num,
 .tally,
 .grid td.num,
@@ -289,10 +277,7 @@ select:focus {
 #app-screen {
   display: flex;
   min-height: 100vh;
-  /* The rail is sticky and one viewport tall, so on a long page the
-     strip it sits in would otherwise show the page colour beneath it.
-     Painting the rail colour into that column keeps the left edge dark
-     for the full height of the document. */
+  /* keeps the left column dark below the sticky rail on long pages */
   background: linear-gradient(to right, var(--rail) 0 14.5rem, var(--page) 14.5rem);
 }
 
@@ -357,7 +342,6 @@ select:focus {
   font-weight: 500;
   color: var(--rail-ink);
   text-align: left;
-  /* space for the active marker so labels never shift */
   border-left: 2px solid transparent;
 }
 .rail-link svg {
@@ -569,8 +553,7 @@ select:focus {
   margin: 0;
 }
 
-/* repayment meter: fill in the accent, track a lighter step of the
-   same ramp, so the state reads across the whole bar */
+/* repayment meter */
 .meter {
   height: 7px;
   border-radius: 4px;
@@ -643,8 +626,6 @@ select:focus {
 }
 
 /* ================= the principal / interest split ================= */
-/* A 2px gap in the surface colour separates the two segments; the
-   outer ends are the data ends and carry the 4px rounding. */
 
 .split {
   display: flex;
@@ -726,7 +707,6 @@ select:focus {
     flex-direction: column;
   }
   #app-screen {
-    /* the rail sits on top on narrow screens, so no side column */
     background: var(--page);
   }
   .rail {

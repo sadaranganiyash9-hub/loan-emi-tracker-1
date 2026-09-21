@@ -1,12 +1,5 @@
-// translations.js
-// ----------------------------------------------------------------------
-// Text for the language toggle (bonus). Kept in its own file so app.js
-// stays about behaviour and this stays about wording.
-//
-// Only fixed labels are translated. Data the user typed in (member
-// names) and numbers are left exactly as they are -- translating those
-// would be wrong.
-// ----------------------------------------------------------------------
+// translations.js - labels for the language toggle. Only fixed text is
+// translated; member names and numbers stay as they are.
 
 var TRANSLATIONS = {
   en: {
@@ -34,8 +27,7 @@ var TRANSLATIONS = {
     addMember: "Add a member",
     name: "Name",
     employeeId: "Employee / member ID",
-    // Two variants on purpose: the form field mentions the unit, the
-    // column heading doesn't, because those cells already show "₹".
+    // the form field mentions the unit, the column heading doesn't
     salaryInput: "Monthly salary (₹)",
     monthlySalary: "Monthly salary",
     allMembers: "All members",
@@ -74,8 +66,6 @@ var TRANSLATIONS = {
     forecloseLoan: "Foreclose this loan",
     emiSchedule: "EMI schedule",
     split: "Split",
-    scheduleNote:
-      "Each bar shows how that instalment splits. Interest shrinks every month because it is charged only on the balance still owed.",
     emiNo: "EMI #",
     dueDate: "Due date",
     emiAmount: "EMI amount",
@@ -157,8 +147,6 @@ var TRANSLATIONS = {
     forecloseLoan: "यह ऋण फ़ोरक्लोज़ करें",
     emiSchedule: "ईएमआई अनुसूची",
     split: "विभाजन",
-    scheduleNote:
-      "प्रत्येक बार दिखाता है कि वह किस्त कैसे बँटती है। ब्याज हर महीने घटता है क्योंकि वह केवल बची हुई शेष राशि पर लगता है।",
     emiNo: "ईएमआई #",
     dueDate: "देय तिथि",
     emiAmount: "ईएमआई राशि",

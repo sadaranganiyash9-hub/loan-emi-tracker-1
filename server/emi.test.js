@@ -1,14 +1,5 @@
-// emi.test.js
-// ----------------------------------------------------------------------
-// Tests for the EMI maths. No test framework needed -- Node can run
-// this on its own:
-//
-//     npm test          (or:  node server/emi.test.js)
-//
-// The point of these is not coverage for its own sake. The EMI split
-// and the rounding on the final instalment are the two things most
-// likely to be quietly wrong, so those are what get pinned down here.
-// ----------------------------------------------------------------------
+// emi.test.js - tests for the EMI maths. No test framework needed:
+//     npm test        (or: node server/emi.test.js)
 
 const {
   calculateEMI,
@@ -40,15 +31,10 @@ function section(title) {
 section("The EMI formula");
 // ----------------------------------------------------------------------
 
-// Reference case worked out by hand before any code was written:
-//   P = 1,00,000   rate = 8% p.a.   n = 12 months
-//   r = 0.08/12 = 0.0066667
-//   (1+r)^12 = 1.0830
-//   EMI = 100000 * 0.0066667 * 1.0830 / 0.0830 = 8698.84 -> 8699
+// P = 100000, 8% a year, 12 months -> 8698.84, rounds to 8699
 check("100000 at 8% over 12 months gives an EMI of 8699", Math.round(calculateEMI(100000, 8, 12)) === 8699);
 
-// With n = 1 the formula cancels down to P * (1 + r), i.e. the loan
-// plus a single month of interest. Good algebraic sanity check.
+// with n = 1 the formula cancels down to P * (1 + r)
 const monthlyRate = 0.08 / 12;
 check(
   "a 1-month loan's EMI is just principal + one month of interest",
@@ -70,8 +56,7 @@ check("month 1 leaves a balance of 91968", ref.schedule[0].balance === 91968);
 check("month 12 interest is only 58, because barely anything is still owed", ref.schedule[11].interest === 58);
 check("the final balance is exactly 0", ref.schedule[11].balance === 0);
 
-// This is the defining behaviour of reducing-balance interest, so assert
-// it across the whole schedule rather than just spot-checking two rows.
+// check this holds for every row, not just the first and last
 let interestAlwaysFalls = true;
 let principalAlwaysRises = true;
 for (let i = 1; i < ref.schedule.length; i++) {
@@ -88,9 +73,7 @@ check("last EMI falls due 12 months after the start date", ref.schedule[11].dueD
 section("Rounding: every schedule must fully repay the loan");
 // ----------------------------------------------------------------------
 
-// Awkward numbers on purpose -- primes, tiny loans, long tenures --
-// since this is where rounding drift would show up if the last row
-// weren't being forced to clear the balance.
+// awkward numbers on purpose - this is where rounding would go wrong
 const roundingCases = [
   [100000, 12],
   [250000, 24],

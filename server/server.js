@@ -1,11 +1,5 @@
-// server.js
-// ----------------------------------------------------------------------
-// The Express app: the JSON API, plus serving the frontend out of
-// /public. The app is small enough that one routes file is easier to
-// follow than several, but the things worth isolating are isolated --
-// the maths in emi.js, the derived values in loanView.js, storage in
-// db.js, login in auth.js. This file is just the HTTP layer.
-// ----------------------------------------------------------------------
+// server.js - the Express app: the API routes, plus serving the
+// frontend files out of /public.
 
 const express = require("express");
 const path = require("path");
@@ -15,13 +9,10 @@ const { buildLoanView, quoteForeclosure } = require("./loanView.js");
 const { validateLoanInputs, canTakeTopUp, percentRepaid } = require("./emi.js");
 const { checkCredentials, requireLogin, SESSION_TOKEN } = require("./auth.js");
 
-// Every loan in this app is 8% per annum, reducing balance. It's a
-// business rule rather than a per-loan input, so it lives in exactly
-// one place -- if the rate ever changes, this is the only line to edit.
+// every loan is 8% per year, reducing balance - kept in one place
 const ANNUAL_RATE_PERCENT = 8;
 
-// Minimum share of an existing loan that must be repaid before the
-// member may take another one on top of it.
+// how much of an existing loan must be repaid before another is allowed
 const TOP_UP_THRESHOLD_PERCENT = 33;
 
 const app = express();
@@ -50,7 +41,7 @@ app.post("/api/login", (req, res) => {
 app.get("/api/members", requireLogin, (req, res) => {
   let members = db.listMembers();
 
-  // Search (bonus). Matches on either name or employee ID.
+  // search on name or employee ID
   const search = (req.query.search || "").trim().toLowerCase();
   if (search !== "") {
     members = members.filter(
@@ -92,8 +83,7 @@ app.post("/api/members", requireLogin, (req, res) => {
 app.get("/api/loans", requireLogin, (req, res) => {
   const loans = req.query.memberId ? db.listLoansForMember(req.query.memberId) : db.listLoans();
 
-  // The list needs the member's name, and the frontend shouldn't have
-  // to stitch that together itself, so attach it here.
+  // attach the member's name so the frontend doesn't have to look it up
   let views = loans.map((loan) => {
     const view = buildLoanView(loan);
     const member = db.findMemberById(loan.memberId);
@@ -102,8 +92,7 @@ app.get("/api/loans", requireLogin, (req, res) => {
     return view;
   });
 
-  // Search (bonus). Matches on member name, employee ID, or status --
-  // so typing "closed" filters to closed loans.
+  // search on member name, employee ID or status
   const search = (req.query.search || "").trim().toLowerCase();
   if (search !== "") {
     views = views.filter(
@@ -131,13 +120,8 @@ app.get("/api/loans/:id", requireLogin, (req, res) => {
   res.json(view);
 });
 
-/**
- * Top-up gating (bonus).
- *
- * If the member already has an active loan that isn't at least 33%
- * repaid, they can't take another one yet. Returns details of the loan
- * that's blocking it, or null if they're clear to borrow.
- */
+// If the member has an active loan under 33% repaid they can't take
+// another one. Returns that loan's details, or null if they're clear.
 function findLoanBlockingTopUp(memberId) {
   const existingLoans = db.listLoansForMember(memberId);
 
@@ -165,13 +149,12 @@ app.post("/api/loans", requireLogin, (req, res) => {
   const principal = Number(body.principal);
   const tenureMonths = Number(body.tenureMonths);
 
-  // Same validation the tests cover -- one function, used in both places.
   const problem = validateLoanInputs(principal, ANNUAL_RATE_PERCENT, tenureMonths);
   if (problem) {
     return res.status(400).json({ error: problem });
   }
 
-  // Default the start date to today if the form didn't send one.
+  // default to today if the form didn't send a date
   const startDate = body.startDate ? String(body.startDate) : new Date().toISOString().slice(0, 10);
   if (isNaN(Date.parse(startDate))) {
     return res.status(400).json({ error: "Start date is not a valid date" });
@@ -194,7 +177,7 @@ app.post("/api/loans", requireLogin, (req, res) => {
   res.status(201).json(buildLoanView(loan));
 });
 
-/** Foreclosure (bonus): settle and close a loan early. */
+// settle and close a loan early
 app.post("/api/loans/:id/foreclose", requireLogin, (req, res) => {
   const loan = db.findLoanById(req.params.id);
   if (!loan) {
@@ -216,7 +199,7 @@ app.post("/api/loans/:id/foreclose", requireLogin, (req, res) => {
 // Report
 // ======================================================================
 
-/** One row per member: how many loans they have and what they still owe. */
+// one row per member: loan count and what they still owe
 function buildOutstandingReport() {
   const allLoans = db.listLoans();
 
@@ -242,7 +225,7 @@ app.get("/api/report/outstanding", requireLogin, (req, res) => {
   res.json(buildOutstandingReport());
 });
 
-/** Wrap a CSV field in quotes if it contains a comma, quote or newline. */
+// quote a CSV field if it contains a comma, quote or newline
 function csvCell(value) {
   const text = String(value);
   if (/[",\n]/.test(text)) {
