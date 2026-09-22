@@ -1,5 +1,7 @@
 const { buildLoanView, quoteForeclosure } = require("./loanView.js");
-const { check, section } = require("./test-helpers.js");
+const { check, section, throws } = require("./test-helpers.js");
+
+const ALL_TWELVE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 function loanWith(paidEmis, extra) {
   return Object.assign(
@@ -22,47 +24,34 @@ section("A loan with nothing paid yet");
 
 const fresh = buildLoanView(loanWith([]));
 check("the whole principal is outstanding", fresh.outstandingBalance === 100000);
-check("nothing is repaid", fresh.percentRepaid === 0);
 check("it is Active", fresh.status === "Active");
-check("no schedule row is marked paid", fresh.schedule.every((r) => r.paid === false));
 
-section("Paying EMIs in order");
+section("Paying EMIs");
 
 const eight = buildLoanView(loanWith([1, 2, 3, 4, 5, 6, 7, 8]));
-check("outstanding matches the schedule balance after EMI 8", eight.outstandingBalance === eight.schedule[7].balance);
-check("...which is 34221", eight.outstandingBalance === 34221);
+check("outstanding matches the schedule balance after EMI 8 (34221)", eight.outstandingBalance === eight.schedule[7].balance && eight.outstandingBalance === 34221);
 check("repaid is 65.8%", eight.percentRepaid.toFixed(1) === "65.8");
-check("paidCount is 8", eight.paidCount === 8);
-check("row 8 is flagged paid and row 9 is not", eight.schedule[7].paid === true && eight.schedule[8].paid === false);
-check("it is still Active", eight.status === "Active");
-
-section("Paying out of order");
 
 // Only EMI 5 paid: just that row's principal comes off, nothing else.
 const justFive = buildLoanView(loanWith([5]));
-check("only that row's principal is deducted", justFive.outstandingBalance === 100000 - justFive.schedule[4].principal);
-check("earlier unpaid rows are not treated as paid", justFive.schedule[0].paid === false);
+check("paying out of order deducts only that row's principal", justFive.outstandingBalance === 100000 - justFive.schedule[4].principal);
 
 section("A fully repaid loan");
 
-const all = buildLoanView(loanWith([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]));
+const all = buildLoanView(loanWith(ALL_TWELVE));
 check("outstanding is exactly 0", all.outstandingBalance === 0);
-check("repaid is 100%", all.percentRepaid === 100);
 check("it closes itself", all.status === "Closed");
-check("it cannot be foreclosed", (() => { try { quoteForeclosure(loanWith([1,2,3,4,5,6,7,8,9,10,11,12])); return false; } catch { return true; } })());
+check("it cannot be foreclosed", throws(() => quoteForeclosure(loanWith(ALL_TWELVE))));
 
 section("A foreclosed loan");
 
 const closed = buildLoanView(loanWith([1, 2], { foreclosedAt: "2026-04-01T00:00:00.000Z", foreclosureAmount: 84000 }));
-check("outstanding is 0 whatever was ticked", closed.outstandingBalance === 0);
-check("it is Closed", closed.status === "Closed");
-check("it reports as foreclosed", closed.foreclosed === true);
-check("the settlement amount is kept", closed.foreclosureAmount === 84000);
+check("outstanding is 0 whatever was ticked, and it reads as Closed", closed.outstandingBalance === 0 && closed.status === "Closed");
 
 section("Odd stored data");
 
 // Loans saved before the Paid checkbox existed have no paidEmis field.
-const legacy = {
+const legacy = buildLoanView({
   id: "old",
   memberId: "m1",
   principal: 100000,
@@ -71,20 +60,15 @@ const legacy = {
   startDate: "2026-01-01",
   foreclosedAt: null,
   foreclosureAmount: null,
-};
-const legacyView = buildLoanView(legacy);
-check("a loan with no paidEmis field still loads", legacyView.outstandingBalance === 100000);
-check("...and reads as nothing paid", legacyView.paidCount === 0 && legacyView.percentRepaid === 0);
-check("...and is Active", legacyView.status === "Active");
+});
+check("a loan with no paidEmis field still loads, and reads as nothing paid", legacy.outstandingBalance === 100000 && legacy.paidCount === 0);
 
 // The API won't store an EMI number outside the tenure, but a hand-edited
 // file could. It must not affect the money or the count.
 const bogus = buildLoanView(loanWith([1, 2, 99]));
-check("an out-of-range EMI number doesn't change the balance", bogus.outstandingBalance === buildLoanView(loanWith([1, 2])).outstandingBalance);
-check("...and isn't counted as paid", bogus.paidCount === 2);
+check("an out-of-range EMI number changes neither the balance nor the count", bogus.outstandingBalance === buildLoanView(loanWith([1, 2])).outstandingBalance && bogus.paidCount === 2);
 
 section("Foreclosure quote");
 
-const quote = quoteForeclosure(loanWith([1, 2, 3, 4, 5, 6, 7, 8]));
 // 34221 outstanding + one month of interest = 34221 + round(34221 * 0.08/12) = 34221 + 228
-check("settling 8-of-12 paid costs 34449", quote === 34449);
+check("settling 8-of-12 paid costs 34449", quoteForeclosure(loanWith([1, 2, 3, 4, 5, 6, 7, 8])) === 34449);

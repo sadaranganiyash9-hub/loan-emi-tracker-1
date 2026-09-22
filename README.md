@@ -17,7 +17,7 @@ Then open http://localhost:3000 and log in with **admin / admin123** (the form
 comes pre-filled — the login is mock, which the brief allows).
 
 ```bash
-npm test     # 71 checks, one total at the end
+npm test     # 38 checks, one total at the end
 npm run dev  # restarts the server when a file changes
 ```
 
@@ -133,7 +133,7 @@ cases above.
 ## Done
 
 All the core requirements, plus these bonuses: foreclosure, top-up gating,
-search on both lists, dark mode, and tests (71 checks). Each schedule row
+search on both lists, dark mode, and tests (38 checks). Each schedule row
 also has a small bar showing how that instalment splits, which makes the
 shrinking interest easier to see than the numbers alone.
 

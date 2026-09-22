@@ -17,6 +17,16 @@ function section(title) {
   console.log("\n" + title);
 }
 
+/* true if fn threw - for checks where throwing is the correct behaviour */
+function throws(fn) {
+  try {
+    fn();
+    return false;
+  } catch (error) {
+    return true;
+  }
+}
+
 function summary() {
   console.log("\n" + "-".repeat(50));
   if (failed === 0) {
@@ -27,4 +37,4 @@ function summary() {
   return failed;
 }
 
-module.exports = { check, section, summary };
+module.exports = { check, section, throws, summary };
