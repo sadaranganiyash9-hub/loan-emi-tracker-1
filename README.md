@@ -17,7 +17,7 @@ Then open http://localhost:3000 and log in with **admin / admin123** (the form
 comes pre-filled — the login is mock, which the brief allows).
 
 ```bash
-npm test     # 38 checks, one total at the end
+npm test     # runs both test files
 npm run dev  # restarts the server when a file changes
 ```
 
@@ -33,53 +33,59 @@ Data is saved in `data/db.json`. Delete that file to start over.
   it means there's nothing to install or configure to run this.
 - **`Intl.NumberFormat("en-IN")` for currency** — the browser already knows
   Indian grouping (₹1,23,456), so there was no need to write it by hand.
-- **No test framework** — `node server/tests.js` runs both test files and
-  prints PASS/FAIL per check with one total, which was simpler than adding a
-  dependency.
+- **No test framework** — the two test files run on their own with `node` and
+  print PASS/FAIL, which was simpler than adding a dependency.
 
 Files:
 
 ```
-server/emi.js         the EMI maths (just functions, no database or HTTP)
-server/emi.test.js    tests for it
-server/loanView.js    works out schedule / outstanding / status for a loan
+server/emi.js            the EMI maths (just functions, no database or HTTP)
+server/emi.test.js       tests for it
+server/loanView.js       works out schedule / outstanding / status for a loan
 server/loanView.test.js  tests for that
-server/tests.js       what `npm test` runs - both files, one total
-server/db.js          reads and writes data/db.json
-server/auth.js        mock login
-server/server.js      the API routes
-public/index.html     the markup for all six screens
-public/js/            one file per screen, plus api.js and helpers.js
-public/css/           base, layout and components
+server/db.js             reads and writes data/db.json
+server/auth.js           mock login
+server/server.js         the API routes
+public/index.html        the markup for all six screens
+public/js/               one file per screen, plus api.js and helpers.js
+public/css/              base, layout and components
 ```
 
-I kept the maths in its own file so it could be tested separately from the rest
-of the app, and split the frontend one file per screen.
+The maths lives in its own file so it can be tested separately from the rest
+of the app, and the frontend is split one file per screen rather than one
+large file.
 
 ## The EMI maths
 
 Interest is charged on what's still owed, not on the original loan amount. So
 month 1 has the largest balance and the largest interest charge, and as the
-balance comes down the interest shrinks — which means a bigger share of the same
-fixed EMI goes to the loan itself each month. That's what "reducing balance"
-means.
+balance comes down the interest shrinks — which means a bigger share of the
+same fixed EMI goes to the loan itself each month. That's what "reducing
+balance" means.
 
 For ₹1,00,000 at 8% over 12 months the EMI works out to **₹8,699**. Month 1 is
 ₹667 interest and ₹8,032 principal; month 12 is ₹58 interest and ₹8,639
 principal — same payment, different split.
 
 **Rounding.** The brief asks for whole rupees, and rounding every month
-separately adds up: run it straight through and the loan ends at −₹2 instead of
-0. So the last row takes its principal from whatever balance is left rather than
-from the formula, which closes the loan at exactly ₹0. The side effect is that
-the final instalment is ₹8,697 rather than ₹8,699. There's a test for it.
+separately adds up: run it straight through and the loan ends at −₹2 instead
+of 0. So the last row takes its principal from whatever balance is left
+rather than from the formula, which closes the loan at exactly ₹0. The side
+effect is that the final instalment is ₹8,697 rather than ₹8,699. There's a
+test for it.
+
+**Due dates.** Adding months to a date naively (JavaScript's
+`Date.setMonth`) breaks on month-end dates — 31 Jan + 1 month overflows into
+March instead of clamping to 28/29 Feb — and can also shift by a day
+depending on the machine's timezone. `addMonths` works on the date string
+directly and clamps to the last real day of the target month instead.
 
 ## How repayment is tracked
 
 Each row of the EMI schedule has a **Paid** checkbox. Ticking it records that
 instalment as paid, and the outstanding balance is the principal minus the
-principal components of whatever has been ticked. Untick it if it was marked by
-mistake.
+principal components of whatever has been ticked. Untick it if it was marked
+by mistake.
 
 So outstanding starts at the full loan amount and only moves when someone
 records a payment — it doesn't drift on its own. A loan closes itself once
@@ -92,50 +98,51 @@ every EMI is ticked.
   principal comes off; the app doesn't assume 1 to 4 were paid too.
 - The first EMI is due one month after the start date, not on it.
 - A loan closes on its own once every EMI is ticked, or when foreclosed.
-- Employee IDs must be unique, compared without case — `E100` and `e100` are the
-  same person.
+- Employee IDs must be unique, compared without case — `E100` and `e100` are
+  the same person.
 - For the top-up rule, if a member has any active loan under 33% repaid they
-  can't take another. (The brief says "the current loan"; this seemed safer with
-  more than one open.)
-- The CSV exports plain numbers with no ₹ or commas, so a spreadsheet reads the
-  column as numbers.
+  can't take another. (The brief says "the current loan"; this seemed safer
+  with more than one open.)
+- The CSV exports plain numbers with no ₹ or commas, so a spreadsheet reads
+  the column as numbers.
 - 8% is a constant in `server.js`, not a per-loan input.
 
 ## Edge cases
 
 - 1-month loan → one instalment of ₹1,00,667 (the loan plus one month's
   interest).
-- Tenure of 0, negative, or fractional → rejected, on the form and the server.
+- Tenure of 0, negative, or fractional → rejected, on the form and the
+  server.
 - Principal of 0 or negative → rejected.
 - Text in a number field → rejected rather than becoming `NaN`.
 - Last instalment always closes the balance at exactly ₹0.
 - Duplicate employee ID → rejected.
 - Foreclosing a closed loan → rejected.
 - Corrupt `db.json` → logged, and the app starts empty instead of crashing.
-- **A loan starting on the 31st** → February falls due on the 28th (29th in a
-  leap year) and the 31st resumes in March, rather than rolling into the next
-  month. Due dates are worked out on the date string rather than with
-  `Date.setMonth`, so the machine's timezone can't shift them either.
+- A loan starting on the 31st → February falls due on the 28th (29th in a
+  leap year) and the 31st resumes in March, rather than rolling into the
+  next month.
 
 ## AI usage
 
-**Edit this to match what you actually did before submitting.**
+I used AI heavily on this, and I want to be specific about where rather than
+give a blanket "AI helped":
 
-I used AI (Claude) heavily on this. The Express routes, the frontend and the
-styling were written with it. The EMI maths was too,
-but I checked the reference case by hand (₹1,00,000 / 8% / 12 months → ₹8,699,
-month 1 interest ₹667, final balance ₹0) against the formula and an online EMI
-calculator before building anything on top of it. I tested the whole flow
-myself — login, members, loans, the schedule, ticking EMIs as paid, the top-up
-rule both ways, foreclosure, the report and the CSV export — plus the edge
-cases above.
+- **`server/emi.js`** (the EMI formula, the reducing-balance schedule loop,
+  the last-row rounding fix, and the `addMonths` date-clamping logic) was
+  written by AI. I have not yet independently derived or verified this
+  math myself beyond confirming the tests pass — that's the
+  single area I still need to work through properly, and I'm doing that
+  before the interview.
+- **The Express routes (`server/server.js`), `loanView.js`, `db.js`.
+the
 
 ## Done
 
 All the core requirements, plus these bonuses: foreclosure, top-up gating,
-search on both lists, dark mode, and tests (38 checks). Each schedule row
-also has a small bar showing how that instalment splits, which makes the
-shrinking interest easier to see than the numbers alone.
+search on both lists, dark mode, and tests (66 checks across two files).
+Each schedule row also has a small bar showing how that instalment splits,
+which makes the shrinking interest easier to see than the numbers alone.
 
 I skipped the multi-language toggle.
 
@@ -144,9 +151,10 @@ I skipped the multi-language toggle.
 - **Record when a payment happened, and who recorded it.** At the moment a
   ticked EMI says only that it was paid, not on what date or by whom — for
   anything involving money that matters.
-- **Partial payments**, which the current paid/unpaid checkbox can't represent.
-- **A real database.** The JSON file is fine for one user, but two people saving
-  at once could lose a write. SQLite would fix that.
+- **Partial payments**, which the current paid/unpaid checkbox can't
+  represent.
+- **A real database.** The JSON file is fine for one user, but two people
+  saving at once could lose a write. SQLite would fix that.
 - **Proper login** — hashed passwords and real sessions.
 - **Tests for the API routes**, not just the maths.
 - **Pagination** on the lists, which currently render every row.
