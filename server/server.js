@@ -247,7 +247,7 @@ app.use((req, res) => {
   res.status(404).send("Not found");
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4050;
 
 app.listen(PORT, () => {
   console.log("Loan EMI Tracker is running at http://localhost:" + PORT);
